@@ -1,0 +1,12 @@
+Produto;Valores;Data;Tipo de Produto
+Torta ;10000;15/01/2025;SubProduto
+Pluma;20000;23/01/2025;Principal
+Torta ;34000;01/02/2025;SubProduto
+Farelo;10000;23/01/2025;SubProduto
+Pluma;23000;21/02/2025;Principal
+Torta ;10000;25/02/2025;SubProduto
+Pluma;20000;25/02/2025;Principal
+Caroço;43000;25/02/2025;SubProduto
+Farelo;60000;02/03/2025;SubProduto
+Pluma;100000;03/03/2025;Principal
+Caroço;30000;04/04/2025;SubProduto
