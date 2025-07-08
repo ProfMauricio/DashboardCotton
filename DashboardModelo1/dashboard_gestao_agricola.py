@@ -47,23 +47,34 @@ if __name__ == '__main__':
     # filtro dos voos realizados
     voo_selecionado = st.sidebar.selectbox("Dados de qual voo",
                                            [f'voo{i+1}' for i in range(len(lista_voos))] )
+
     lista_voo_indice = {f'voo{i+1}':i for i in range(len(lista_voos))}
     # obtendo os dados do voo selecionado
     dados_gestao_agro =  dados_agricolas_voos[lista_voo_indice[voo_selecionado]]
 
-
+    indice_filtro_ndvi={'voo1': 0.1,
+                        'voo2': 0.6,
+                        'voo3': 0.6,
+                        'voo4': 0.6}
+    dados_gestao_agro['ndvi_cores'] = dados_gestao_agro['ndvi_avg'].map(lambda x: 'red' if x < indice_filtro_ndvi[voo_selecionado] else 'green')
     # gráficos de NDVI
     fig_ndvi  = px.bar(dados_gestao_agro, y='ndvi_avg', x="bloco",
-                                     labels={'bloco':'Bloco', 'ndvi_avg':'Valor médio de NVDI por bloco'},
-                                     title=f"Valores médios de NDVI por bloco no voo ({voo_selecionado})")
+                       color='ndvi_cores', color_discrete_map="identity",
+                       labels={'bloco':'Bloco', 'ndvi_avg':'Valor médio de NVDI por bloco'},
+                       title=f"Valores médios de NDVI por bloco no voo ({voo_selecionado})")
 
-    col1, col2, col3 = st.columns([2, 1, 1])
+    col1, col2, col3 = st.columns([4, 1, 1])
     col1.plotly_chart(fig_ndvi)
 
     # gráficos de GLI
     fig_gli = px.bar(dados_gestao_agro, y='gli_avg', x="bloco",
                      labels={'bloco': 'Bloco', 'ndvi_avg': 'Valor médio de GLI por bloco'},
+                     text_auto=True,
                      title=f"Valores médios de GLI por bloco no voo ({voo_selecionado})")
+
+    fig_gli.update_xaxes(
+        type="category",
+    )
 
     col1, col2, col3 = st.columns([2, 1, 1])
     col1.plotly_chart(fig_gli)

@@ -23,7 +23,7 @@ authenticator = stauth.Authenticate(
 )
 try:
     auth = authenticator.login('main')
-    print(auth)
+    #print(auth)
 except Exception as e:
     st.error(e)
 
