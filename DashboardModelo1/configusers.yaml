@@ -1,0 +1,29 @@
+credentials:
+  usernames:
+    mauricio:
+      email: mauricio@ic.ufmt.br
+      failed_login_attempts: 0 # Will be managed automatically
+      first_name: Mauricio
+      last_name: Pereira
+      logged_in: False # Will be managed automatically
+      password: "123456" # Will be hashed automatically
+      roles: # Optional
+        - admin
+        - editor
+        - viewer
+    cruvinel:
+      email: pauloecruvinel@gmail.com
+      failed_login_attempts: 0 # Will be managed automatically
+      first_name: Paulo
+      last_name: Cruvinel
+      logged_in: False # Will be managed automatically
+      password: "123456" # Will be hashed automatically
+      roles: # Optional
+        - viewer
+cookie:
+  expiry_days: 30
+  key: random_signature_key # Must be string
+  name: random_cookie_name
+preauthorized:
+  emails:
+  - mauricioflp@gmail.com

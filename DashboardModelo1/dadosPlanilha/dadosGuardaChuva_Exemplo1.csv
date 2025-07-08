@@ -1,6 +1,6 @@
 Nome da Fazenda,São José
-Total de Hectares,"350,00"
-Quantidade de Talhões,"4,00"
+Total de Hectares,350
+Quantidade de Talhões,4
 1.1 Permanente,"R$ 700,00"
 1.2 Temporária ,"R$ 0,00"
 1.1 Manutenção Máquinas Equipamentos Utilit.,"R$ 333,00"
@@ -23,7 +23,7 @@ Quantidade de Talhões,"4,00"
 1.4 Análise de Solo (A),"R$ 2.121,00"
 1.5 Custo c/ Alimentação,"R$ 2.424,00"
 Permanente para cada Hectare,"R$ 2,00"
-Temporária para cada Hectare,"R$ 0,00"
+Temporária para cada Hectare,"R$ 40,00"
 Manutenção Máquinas Equipamentos Utilit. para cada Hectare,"R$ 0,95"
 Manutenção Benfeitorias para cada Hectare,"R$ 1,27"
 Funrural para cada Hectare,"R$ 1,59"

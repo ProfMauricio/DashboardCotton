@@ -23,7 +23,6 @@ authenticator = stauth.Authenticate(
 )
 try:
     auth = authenticator.login('main')
-    print(auth)
 except Exception as e:
     st.error(e)
 
@@ -31,19 +30,12 @@ except Exception as e:
 if st.session_state["authentication_status"]:
     # User is connected
     authenticator.logout('Logout', 'main')
-    st.title(f'🔐 Welcome *{st.session_state["name"]}*')
-    # verificando as credenciais do usuario logado
-
     custo_producao_page = st.Page("dashboard_custo_producao.py", title="Custo de Produção",
                                   icon=":material/empty_dashboard:")
 
-    custo_gestao_agricola = st.Page('dashboard_gestao_agricola.py', title='Gestão Agrícola',
-                                    icon=":material/empty_dashboard:")
-    print(st.session_state)
-    if 'admin' in st.session_state["roles"]:
-        pg = st.navigation([custo_producao_page, custo_gestao_agricola])
-    else:
-        pg = st.navigation([custo_gestao_agricola])
+    # custo_
+
+    pg = st.navigation([custo_producao_page, st.Page("dashboard_modelo1.py")])
 
     pg.run()
 elif st.session_state["authentication_status"] == False:
@@ -56,5 +48,7 @@ elif st.session_state["authentication_status"] == None:
     st.stop()
 
 
+st.title('🔐 Protected Application')
+st.write(f'Welcome *{st.session_state["name"]}*')
 
 
