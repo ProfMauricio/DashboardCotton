@@ -66,6 +66,8 @@ if __name__ == '__main__':
     col1, col2, col3 = st.columns([4, 1, 1])
     col1.plotly_chart(fig_ndvi)
 
+    #df_ndvi_filtro =
+
     # gráficos de GLI
     fig_gli = px.bar(dados_gestao_agro, y='gli_avg', x="bloco",
                      labels={'bloco': 'Bloco', 'ndvi_avg': 'Valor médio de GLI por bloco'},
@@ -76,7 +78,7 @@ if __name__ == '__main__':
         type="category",
     )
 
-    col1, col2, col3 = st.columns([2, 1, 1])
+    col1, col2, col3 = st.columns([4, 1, 1])
     col1.plotly_chart(fig_gli)
 
 
@@ -85,7 +87,7 @@ if __name__ == '__main__':
                      labels={'bloco': 'Bloco', 'savi_avg': 'Valor médio de SAVI por bloco'},
                      title=f"Valores médios de SAVI por bloco no voo ({voo_selecionado})")
 
-    col1, col2, col3 = st.columns([2, 1, 1])
+
     col1.plotly_chart(fig_savi)
 
 
@@ -94,7 +96,9 @@ if __name__ == '__main__':
                      labels={'bloco': 'Bloco', 'prod': 'Valor médio de Produtividade por bloco'},
                      title=f"Valores médios de Produtividade por bloco no voo ({voo_selecionado})")
 
-    col1, col2, col3 = st.columns([2, 1, 1])
+
+
+
     col1.plotly_chart(fig_savi)
 
 
