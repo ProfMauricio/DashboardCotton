@@ -1,33 +1,12 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-
-
-def valor_float( temp : str) -> float :
-    """
-    Converte o dado que vem da planilha
-    :param temp:
-    :return:
-    """
-    temp1 = temp.replace('.', '')
-    temp1 = temp1.replace(',', '.')
-    return float(temp1[2:])
+from leitura_planilhas import *
 
 
 
-# leitura de dados
-def ler_dados_fazenda()-> pd.DataFrame :
-    """
-        Metodo para obter dados de custo de producoa
-    """
-    df_fazenda = pd.read_csv('./dadosPlanilha/dadosGuardaChuva_Exemplo1.csv', header=None,)
-    df_fazenda.columns = ['Nomes', 'Valores']
 
-    
-    print(df_fazenda)
-    return df_fazenda
-
-    """
+"""
     fazenda = {
         'Nome': [df_fazenda.iloc[0, 1]],
         'Total de Hectares': [df_fazenda.iloc[1, 1]],
@@ -56,10 +35,10 @@ def ler_dados_fazenda()-> pd.DataFrame :
     return df
     """
 
-
 if __name__ == '__main__':
     # dados originais 
-    dados_fazenda = ler_dados_fazenda()
+    dados_fazenda, dados_talhoes = ler_dados_fazenda('./dadosPlanilha/planilha_saida.xlsx')
+
     # organizando os dados de interesse para o dashboard     
     dados_custo = dados_fazenda.copy()
     # removendo as linhas 
@@ -72,16 +51,12 @@ if __name__ == '__main__':
 
     tam = len(dados_custo)
 
-    for i in range(0,tam):
-        dados_custo.iloc[i,1] = valor_float(dados_custo.iloc[i,1])
-    print(dados_custo)
-
     # separando os dados de custo geral dos custos por hectare
-    dados_custo_geral = dados_custo.loc[ [i for i in range(3,24)]]
-    dados_custo_hectares = dados_custo.loc[ [i for i in range(24,tam)]]
+    dados_custo_geral = dados_custo.loc[ [i for i in range(4,25)]]
+    dados_custo_hectares = dados_custo.loc[ [i for i in range(25,tam)]]
     for i in range(len(dados_custo_hectares)):
         tmp = dados_custo_hectares.iloc[i,0]
-        tmp = tmp.replace("para cada Hectare", "")
+        #tmp = tmp.replace("para cada Hectare", "")
         dados_custo_hectares.iloc[i,0] = tmp
 
     ################
