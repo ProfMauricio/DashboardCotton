@@ -99,15 +99,15 @@ class DadosFazenda():
 
 
 ##
-
-arquivo = DadosFazenda()
-resposta = arquivo.realizar_login("mauricio", "teste")
-if True : #resposta['success'] :
-    print(" Login realizado com sucesso")
-    resposta = arquivo.obter_voo('voo_1', 'dados_voo1.csv')
-    if resposta :
-        print('Arquivo retornado com sucesso')
-    else:
-        print("Falha ao obter arquivo")
+if __name__ == '__main__':
+    arquivo = DadosFazenda()
+    resposta = arquivo.realizar_login("mauricio", "teste")
+    if True : #resposta['success'] :
+        print(" Login realizado com sucesso")
+        resposta = arquivo.obter_voo('voo_1', 'dados_voo1.csv')
+        if resposta :
+            print('Arquivo retornado com sucesso')
+        else:
+            print("Falha ao obter arquivo")
 
 
