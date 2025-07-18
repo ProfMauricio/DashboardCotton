@@ -158,6 +158,11 @@ def carregar_dados_custo(pasta_destino:str="./dados_fazenda") -> (dict, dict) :
     arquivo_custo_padrao = 'planilha_saida.xlsx'
     nome_arquivo_dados = os.path.join(pasta_destino, arquivo_custo_padrao)
     dados_fazenda, dados_talhoes = ler_dados_fazenda(nome_arquivo_dados)
+    info_fazenda = {'NomeFazenda': "Teste",  #dados_fazenda.iloc[2, 1],
+                    'TotalHectares': "300.43", #dados_fazenda.iloc[3, 1],
+                    'QuantidadeTalhoes': 10, #dados_fazenda.iloc[4, 1],
+                    }
+
     # organizando os dados de interesse para o dashboard
     temp_dados = dados_fazenda.copy()
     temp_dados_custo_geral = pd.DataFrame(columns=temp_dados.columns)
@@ -292,19 +297,19 @@ def carregar_dados_custo(pasta_destino:str="./dados_fazenda") -> (dict, dict) :
 
 
 
-    return dados_custo_geral, dados_custo_por_hectare, lista_talhoes_geral
+    return info_fazenda, dados_custo_geral, dados_custo_por_hectare, lista_talhoes_geral
 
 
 # =====================================================================================================================
 # =====================================================================================================================
-
+"""
 if __name__ == '__main__':
     local_custo_geral, local_custo_hectare, talhoes_custo_geral = carregar_dados_custo(pasta_destino='./dadosPlanilha')
 
     print(local_custo_geral)
     print(local_custo_hectare)
     print(talhoes_custo_geral)
-
+"""
 
 
 
