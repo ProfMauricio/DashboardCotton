@@ -72,9 +72,9 @@ class DadosFazenda():
     # =================================================================================================================
 
 
-    def obter_voo(self, voo : str , nome_arquivo_local: str) :
+    def obter_voo(self, etapa : str, nome_arquivo_local: str) :
         end_point = 'https://api.embrapa.qgis.miboutech.com/modulo/gestao-agricola/dados/'
-        endpoint = end_point + voo
+        endpoint = end_point + etapa.lower()
         try:
             # ajustar o token na requisicao
 
@@ -104,7 +104,7 @@ if __name__ == '__main__':
     resposta = arquivo.realizar_login("mauricio", "teste")
     if True : #resposta['success'] :
         print(" Login realizado com sucesso")
-        resposta = arquivo.obter_voo('voo_1', 'dados_voo1.csv')
+        resposta = arquivo.obter_voo('Etapa1', 'dados_voo1.csv')
         if resposta :
             print('Arquivo retornado com sucesso')
         else:

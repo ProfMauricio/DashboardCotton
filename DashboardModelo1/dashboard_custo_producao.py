@@ -13,7 +13,7 @@ if __name__ == '__main__':
     #################
     # Configurar o layout da página
     st.set_page_config(layout="wide")
-    st.title(f'Custo de produção - Fazenda {info_fazenda['NomeFazenda']}')
+    st.title(f'Custo de produção - Fazenda {info_fazenda["NomeFazenda"]}')
     st.image('./logo_embrapa.png', width=200)
     col1, col2  = st.columns([7,3])
 
