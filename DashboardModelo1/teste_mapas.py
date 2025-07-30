@@ -2,6 +2,8 @@ import geopandas as gpd
 import geobr
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
+import matplotlib.cm as cm
+from matplotlib.colors import ListedColormap
 
 from dados_fazenda import DadosFazenda
 
@@ -44,7 +46,11 @@ print(dados_mesclados_ndvi)
 
 
 p = shape_file.crs
-dados_mesclados_ndvi.plot(column='status_term', cmap='viridis', legend=True, linewidth=0.5, edgecolor='black')
+
+custom_colors = ['blue', 'green', 'yellow','orange', 'red',   ]
+custom_cmap = ListedColormap(custom_colors)
+#dados_mesclados_ndvi.plot(column='status_term', cmap='viridis', legend=True, linewidth=0.5, edgecolor='black')
+dados_mesclados_ndvi.plot(column='ndvi', cmap=custom_cmap, legend=True, linewidth=0.9, edgecolor='black')
 for axis in [ax.xaxis, ax.yaxis]:
     formatter = mtick.FuncFormatter(numft)
     axis.set_major_formatter(formatter)
