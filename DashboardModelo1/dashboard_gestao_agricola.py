@@ -4,6 +4,17 @@ import plotly.express as px
 
 from dados_fazenda import DadosFazenda
 
+import folium
+from streamlit_folium import st_folium
+import geopandas as gpd
+
+
+@st.cache_resource
+def obter_maps():
+    df_shp =  gpd.read_file('./Shapefile-Grid/grid.shp')
+    return df_shp.to_json()
+
+
 def obter_dados_voos( dados : dict) -> list :
     """
     rotina que lê uma planilha
@@ -115,10 +126,15 @@ if __name__ == '__main__':
                       labels={'bloco': 'Bloco', 'tx_ocupacao': 'Valor  médios de taxa de ocupação por bloco'},
                       title=f"Valores médios de taxa de ocupação por bloco no voo ({etapa_selecionada})")
 
-
-
-
     col1.plotly_chart(fig_tx_ocupacao)
+
+    camada_adicionada = obter_maps()
+
+    with st.form(key='mymap'):
+        m = folium.Map(location=camada_adicionada, zoom_start=12)
+        folium.GeoJson(camada_adicionada, name="Minha camada", style_function=lambda feature: {"fillColor": "yellow", "color": "black", "weight": 0.5, "fillOpacity": 0.4}).add_to(m)
+        st_folium(m, height=800, width=800, use_container_width=True, key='Map')
+        m
 
 
 

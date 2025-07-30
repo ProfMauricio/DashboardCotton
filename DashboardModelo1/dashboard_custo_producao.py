@@ -1,7 +1,8 @@
 import streamlit as st
-import pandas as pd
+#import pandas as pd
 import plotly.express as px
 from leitura_planilhas import *
+
 
 if __name__ == '__main__':
     # dados originais 
@@ -63,6 +64,8 @@ if __name__ == '__main__':
     col1.plotly_chart(fig_guarda_chuva_custos_hectare)
     col1.title("Valores por cada Hectare")
     col1.write(df_custos_por_hectare)
+
+
 
 
 

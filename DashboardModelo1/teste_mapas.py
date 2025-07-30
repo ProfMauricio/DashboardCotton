@@ -3,6 +3,8 @@ import geobr
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 
+from dados_fazenda import DadosFazenda
+
 #import folium
 import streamlit as st
 from shapely.geometry import Polygon, Point
@@ -32,10 +34,17 @@ def numft(x, pos):
     return s
 
 
-shape_file_name = r'/home/mauricio/PycharmProjects/DashboardCotton/DashboardModelo1/Shapefile-Grid/grid.shp'
+shape_file_name = r'./Shapefile-Grid/grid.shp'
 shape_file = gpd.read_file(shape_file_name)
+print(shape_file)
+dados_voo = pd.read_csv('./dadosPlanilha/voos/relatorio_manejo_agricola_etapa2.csv')
+dados_voo = dados_voo.rename(columns={'bloco': 'FID'})
+dados_mesclados_ndvi = shape_file.merge(dados_voo, on='FID', how='inner')
+print(dados_mesclados_ndvi)
+
+
 p = shape_file.crs
-shape_file.plot(facecolor='none', linewidth=0.5, edgecolor='black')
+dados_mesclados_ndvi.plot(column='status_term', cmap='viridis', legend=True, linewidth=0.5, edgecolor='black')
 for axis in [ax.xaxis, ax.yaxis]:
     formatter = mtick.FuncFormatter(numft)
     axis.set_major_formatter(formatter)
