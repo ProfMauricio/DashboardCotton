@@ -67,11 +67,33 @@ def obter_dados_gli() -> pd.DataFrame:
     """
     Função para obter os dados de GLI
     :return: Retorna um dataframe com os dados de GLI
-
-
-# ======================================================================================================================
-# ======================================================================================================================
     """
+
+# ======================================================================================================================
+# ======================================================================================================================
+
+def dividir_coluna():
+    st.markdown(
+        """
+        <style>
+        .st-emotion-cache-1c5c404 { /* Target Streamlit's column container class */
+            border-right: 1px solid #ccc; /* Add a right border to columns */
+            padding-right: 20px; /* Add some padding for spacing */
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+def dividir_linha(col1, col2, col3):
+    col1.divider()
+    col2.divider()
+    col3.divider()
+
+# ======================================================================================================================
+# ======================================================================================================================
+
 
 if __name__ == '__main__':
     # carregando os dados da base (planilhas)
@@ -119,7 +141,7 @@ if __name__ == '__main__':
     dados_shape_mesclados = shape_file.merge(dados_voo, on='FID', how='inner')
 
     # proporção entre as colunas do dashboard
-    col1, col2, col3 = st.columns([5, 5, 3],  gap="medium")
+    col1, col2, col3, col4 = st.columns([1, 1, 1, 1],  gap="medium",vertical_alignment="top")
 
     indice_filtro_ndvi={'Etapa 1': 0.1,
                         'Etapa 2': 0.6,
@@ -127,34 +149,45 @@ if __name__ == '__main__':
                         'voo4': 0.6}
     dados_gestao_agro['ndvi_cores'] = dados_gestao_agro['ndvi'].map(lambda x: 'red' if x < indice_filtro_ndvi[etapa_selecionada] else 'green')
 
+    ## altura dos gráficos
+    alturaPadrao = 530
+
     # ==================================================================================================================
     # TRATANDO DADOS DE NDVI
     # ==================================================================================================================
-    fig_ndvi_shp, ax_ndvi = plt.subplots(1, 1, figsize=(10, 6))
-    dados_shape_mesclados.plot(ax=ax_ndvi,
+    fig_ndvi_shp, ax_ndvi_shp = plt.subplots(1, 1, figsize=(10, 10))
+    dados_shape_mesclados.plot(ax=ax_ndvi_shp,
                                column='gli',
                                cmap='RdYlGn',
                                legend=True,
                                legend_kwds={'label': 'Valores de GLI', 'orientation': 'vertical'},
                                linewidth=0.9,
-                               edgecolor='black',
+                               edgecolor='gray',
+                               vmin=0,
+                               vmax=1,
                                )
-    ax_ndvi.set_title(label=f"NDVI na {etapa_selecionada} ")
 
-    # gráficos de NDVI
-    fig_ndvi  = px.bar(dados_gestao_agro, y='ndvi', x="bloco",
-                       color='ndvi_cores', color_discrete_map="identity",
-                       labels={'bloco':'Bloco', 'ndvi':'Valor médio de NVDI por bloco'},
-                       title=f"Valores médios de NDVI por bloco no voo ({etapa_selecionada})")
+    #ax_ndvi_shp.set_title(label=f"NDVI na {etapa_selecionada} ")
 
-    col1.text("Dados de NVDI por bloco")
-    col2.text("")
+    # gráficos de barras de NDVI
+    fig_ndvi = px.bar(dados_gestao_agro, y='ndvi', x="bloco", height=alturaPadrao,
+                      color='ndvi_cores', color_discrete_map="identity",
+                      labels={'bloco':'Bloco', 'ndvi':'Valor médio de NVDI por bloco'},
+                      #title=f"Valores médios de NDVI por bloco no voo ({etapa_selecionada})",
+                      range_y=[0,1],
+                      )
+
+
+    # setor de exibição de gráficos da primeira coluna (NDVI)
+    col1.text(f"NVDI por bloco - {etapa_selecionada}")
     col1.pyplot(fig_ndvi_shp, use_container_width=True)
-    col2.plotly_chart(fig_ndvi,use_container_width=True)
-    col3.write(dados_gestao_agro[['bloco','ndvi']])
+    col1.plotly_chart(fig_ndvi) #,use_container_width=True)
+    col1.write(dados_gestao_agro[['bloco','ndvi']], unsafe_allow_html=True)
+    # dividir_linha(col1,col2,col3)
+    dividir_coluna()
 
     # dando espaço entre as linhas
-    espacar_linhas(col1,col2,col3, linhas=3)
+    #espacar_linhas(col1,col2,col3, linhas=3)
 
 
     # ==================================================================================================================
@@ -164,67 +197,84 @@ if __name__ == '__main__':
     #df_ndvi_filtro =
 
     # gráficos de GLI
-    fig_gli = px.bar(dados_gestao_agro, y='gli', x="bloco",
+
+    fig_gli = px.bar(dados_gestao_agro, y='gli', x="bloco", height=alturaPadrao,
                      labels={'bloco': 'Bloco', 'gli': 'Valor médio de GLI por bloco'},
                      text_auto=True,
-                     title=f"Valores médios de GLI por bloco no voo ({etapa_selecionada})")
+                     #title=f"Valores médios de GLI por bloco na \netapa ({etapa_selecionada})",
+                     range_y=[0, 1],
+                     )
 
     fig_gli.update_xaxes(
         type="category",
     )
 
+
     # ajustando exibição do mapa com dados de GLI
     custom_colors = ['red', 'orange', 'yellow', 'blue', 'green']
     custom_cmap = ListedColormap(custom_colors)
-    fig_gli_shp, ax_gli = plt.subplots(1, 1, figsize=(10, 6))
+    fig_gli_shp, ax_gli = plt.subplots(1, 1, figsize=(10, 10))
     dados_shape_mesclados.plot(ax=ax_gli,
                                column='gli',
-                               cmap=custom_cmap,
+                               cmap='RdYlGn', #cmap=custom_cmap,
                                legend=True,
                                legend_kwds={'label': 'Valores de GLI', 'orientation': 'vertical'},
                                linewidth=0.9,
-                               edgecolor='black',
+                               edgecolor='gray',
+                               vmin=0,
+                               vmax=1
                                )
-    ax_gli.set_title(label=f"GLI na {etapa_selecionada} ")
+    #ax_gli.set_title(label=f"GLI na {etapa_selecionada} ")
 
     #col1, col2, col3 = st.columns([4, 4, 2])
 
-    col1.text("Dados de GLI por bloco")
+
+    col2.text(f"GLI por bloco - {etapa_selecionada}")
     #col2.text("")
-    col1.pyplot(fig_gli_shp,use_container_width=True)
+    col2.pyplot(fig_gli_shp,use_container_width=True)
     col2.plotly_chart(fig_gli,use_container_width=True)
-    col3.write(dados_gestao_agro[['bloco', 'gli']])
+    col2.write(dados_gestao_agro[['bloco', 'gli']])
 
-
+    # alinhar gráficos
+    #dividir_linha(col1, col2, col3)
     # dando espaço entre as linhas
-    espacar_linhas(col1,col2,col3, linhas=3)
+    #espacar_linhas(col1,col2,col3, linhas=3)
 
     # ==================================================================================================================
     # TRATANDO DADOS DE SAVI
     # ==================================================================================================================
 
     # gráficos de SAVI
-    fig_savi_shp, ax_savi = plt.subplots(1, 1, figsize=(10, 6))
+    fig_savi_shp, ax_savi = plt.subplots(1, 1, figsize=(10, 10))
     dados_shape_mesclados.plot(ax=ax_savi,
                                column='savi',
                                cmap='RdYlGn',
                                legend=True,
                                legend_kwds={'label': 'Valores de SAVI', 'orientation': 'vertical'},
                                linewidth=0.9,
-                               edgecolor='black',
+                               edgecolor='gray',
+                               vmin=0,
+                               vmax=1,
                                )
-    ax_savi.set_title(label=f"SAVI na {etapa_selecionada} ")
+    #ax_savi.set_title(label=f"SAVI na {etapa_selecionada} ")
 
-    fig_savi = px.bar(dados_gestao_agro, y='savi', x="bloco",
+    fig_savi = px.bar(dados_gestao_agro,
+                      y='savi',
+                      x="bloco",
+                      height=alturaPadrao,
                       labels={'bloco': 'Bloco', 'savi': 'Valor médio de SAVI por bloco'},
-                      title=f"Valores médios de SAVI por bloco no voo ({etapa_selecionada})")
+                      #title=f"Valores médios de SAVI por bloco no voo ({etapa_selecionada})",
+                      range_y=[0,1],)
 
-    col1.text("Dados de índice SAVI por bloco")
-    col1.pyplot(fig_savi_shp,use_container_width=True)
-    col2.plotly_chart(fig_savi,use_container_width=True)
+    col3.text(f"Índice SAVI por bloco - {etapa_selecionada}")
+    col3.pyplot(fig_savi_shp,use_container_width=True)
+    col3.plotly_chart(fig_savi,use_container_width=True)
     col3.write(dados_gestao_agro[['bloco', 'savi']])
 
-    espacar_linhas(col1,col2,col3, linhas=3)
+    # alinhar gráficos
+    #dividir_linha(col1, col2, col3)
+    # dando espaço entre as linhas
+    #espacar_linhas(col1,col2,col3, linhas=3)
 
     # ==================================================================================================================
     # TRATANDO DADOS DE STATUS TERM
@@ -278,23 +328,27 @@ if __name__ == '__main__':
     #                           title=f"Valores de status termal por bloco na etapa ({etapa_selecionada})",
     #                           )
 
-    fig_status_termal = px.bar(tipos_status_term,y='count', color='status_term', color_discrete_sequence=custom_colors_termal)
+    fig_status_termal = px.bar(tipos_status_term,
+                               x='status_term',
+                               y='count',
+                               color='status_term',
+                               color_discrete_sequence=custom_colors_termal)
     #
 
-    fig_status_term_shp, ax_status_term = plt.subplots(1, 1, figsize=(10, 6))
+    fig_status_term_shp, ax_status_term = plt.subplots(1, 1, figsize=(10, 10))
     dados_shape_mesclados.plot(ax=ax_status_term,
                                column='status_term',
                                cmap=custom_cmap_termal,
                                legend=True,
                                #legend_kwds={'label': 'Valores de status termal', 'orientation': 'vertical'},
                                linewidth=0.9,
-                               edgecolor='black',)
+                               edgecolor='gray',)
 
     #ax_status_term.set_title(label=f"Status termal na {etapa_selecionada} ")
-    col1.text("Dados de status termal por bloco")
-    col1.pyplot(fig_status_term_shp, use_container_width=True)
-    col2.plotly_chart(fig_status_termal, use_container_width=True)
-    st.write(tipos_status_term)
+    col4.text(f"Status termal por bloco - {etapa_selecionada}")
+    col4.pyplot(fig_status_term_shp, use_container_width=True)
+    col4.plotly_chart(fig_status_termal, use_container_width=True)
+    col4.write(tipos_status_term)
 
     #camada_adicionada = obter_maps()
 
