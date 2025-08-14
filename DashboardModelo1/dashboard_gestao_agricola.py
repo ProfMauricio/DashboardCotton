@@ -33,7 +33,8 @@ def numft(x, pos):
 
 @st.cache_resource
 def obter_maps():
-    df_shp =  gpd.read_file('./Shapefile-Grid/grid.shp')
+    df_shp =  gpd.read_file('./Shapefile-Grid/grid_zoom.shp')
+    df_shp =  gpd.read_file('./Shapefile-Grid/grid_zoom.shp')
     return df_shp.to_json()
 
 # ======================================================================================================================
@@ -97,6 +98,7 @@ def dividir_linha(col1, col2, col3):
 
 if __name__ == '__main__':
     # carregando os dados da base (planilhas)
+    flag_leitura_dados_remoto = False
     dados_agricolas_voos = []
     dados_fazenda = {
         'etapas' : ['Etapa 1', 'Etapa 2', 'Etapa 3'],
@@ -108,18 +110,20 @@ if __name__ == '__main__':
     }
 
     # carregando os arquivos na memoria
-    leitura_dados = DadosFazenda()
-    # buscando os arquivos
-    for i,etapa in enumerate(dados_fazenda['etapas_voos']):
-        resposta = leitura_dados.obter_voo(etapa, dados_fazenda['nomes_arquivos'][i])
-        if i < 2 :
-            resposta = True
-        dados_fazenda['status'][i] = resposta
-        if resposta :
-            print('Voo obtido com sucesso')
+    if not flag_leitura_dados_remoto:
+        leitura_dados = DadosFazenda()
+        flag_leitura_dados_remoto = True
+        # buscando os arquivos
+        for i,etapa in enumerate(dados_fazenda['etapas_voos']):
+            resposta = leitura_dados.obter_voo(etapa, dados_fazenda['nomes_arquivos'][i])
+            if i < 2 :
+                resposta = True
+            dados_fazenda['status'][i] = resposta
+            if resposta :
+                print('Voo obtido com sucesso')
 
-    dados_agricolas_voos = obter_dados_voos(dados_fazenda)
-    lista_filtro_etapas = [dados_fazenda['etapas'][i] for i in range(len(dados_fazenda['etapas'])) if dados_fazenda['status'][i] ]
+        dados_agricolas_voos = obter_dados_voos(dados_fazenda)
+        lista_filtro_etapas = [dados_fazenda['etapas'][i] for i in range(len(dados_fazenda['etapas'])) if dados_fazenda['status'][i] ]
 
     # ajustando o site para  gestão agrícola
     st.set_page_config(layout="wide")
@@ -147,42 +151,72 @@ if __name__ == '__main__':
                         'Etapa 2': 0.6,
                         'Etapa 3': 0.6,
                         'voo4': 0.6}
-    dados_gestao_agro['ndvi_cores'] = dados_gestao_agro['ndvi'].map(lambda x: 'red' if x < indice_filtro_ndvi[etapa_selecionada] else 'green')
+   
 
     ## altura dos gráficos
     alturaPadrao = 530
 
     # ==================================================================================================================
-    # TRATANDO DADOS DE NDVI
+    # TRATANDO DADOS DE NDVI (coluna 1)
     # ==================================================================================================================
+
+    # Criando gráfico do map de grid da primeira linha
     fig_ndvi_shp, ax_ndvi_shp = plt.subplots(1, 1, figsize=(10, 10))
+
     dados_shape_mesclados.plot(ax=ax_ndvi_shp,
-                               column='gli',
+                               column='ndvi',
                                cmap='RdYlGn',
                                legend=True,
                                legend_kwds={'label': 'Valores de GLI', 'orientation': 'vertical'},
-                               linewidth=0.9,
-                               edgecolor='gray',
+                               linewidth=1,
+                               edgecolor='lightgray',
                                vmin=0,
                                vmax=1,
                                )
-
+    
+    
     #ax_ndvi_shp.set_title(label=f"NDVI na {etapa_selecionada} ")
 
-    # gráficos de barras de NDVI
-    fig_ndvi = px.bar(dados_gestao_agro, y='ndvi', x="bloco", height=alturaPadrao,
-                      color='ndvi_cores', color_discrete_map="identity",
-                      labels={'bloco':'Bloco', 'ndvi':'Valor médio de NVDI por bloco'},
-                      #title=f"Valores médios de NDVI por bloco no voo ({etapa_selecionada})",
-                      range_y=[0,1],
-                      )
 
 
     # setor de exibição de gráficos da primeira coluna (NDVI)
-    col1.text(f"NVDI por bloco - {etapa_selecionada}")
+    col1.markdown(f'<div style="text-align: center"><b>NVDI por bloco</b> ({etapa_selecionada})</div>', unsafe_allow_html=True)
     col1.pyplot(fig_ndvi_shp, use_container_width=True)
-    col1.plotly_chart(fig_ndvi) #,use_container_width=True)
-    col1.write(dados_gestao_agro[['bloco','ndvi']], unsafe_allow_html=True)
+
+    valor_filtro_ndvi = col1.slider("Filtro de valores NDVI ", min_value=0.0, max_value=1.0, step=0.01, value=0.0)
+    # filtrando (destacando) os dados abaixo do limiar
+    dados_gestao_agro['ndvi_cores'] = dados_gestao_agro['ndvi'].map(
+        lambda x: 'red' if x < valor_filtro_ndvi else 'green')
+    # gráficos de barras de NDVI
+    fig_ndvi = px.bar(dados_gestao_agro, y='ndvi', x="bloco", height=alturaPadrao,
+                      color='ndvi_cores', color_discrete_map="identity",
+                      labels={'bloco': 'Bloco', 'ndvi': 'Valor médio de NVDI por bloco'},
+                      # title=f"Valores médios de NDVI por bloco no voo ({etapa_selecionada})",
+                      #range_y=[0, 1],
+                      )
+    # plotando gráfico de barras com dados filtrados
+    col1.plotly_chart(fig_ndvi, use_container_width=True)
+    # criando um conjunto dos valores abaixo do limiar definido
+    dados_ndvi_filtrado = dados_gestao_agro[dados_gestao_agro['ndvi'] <= valor_filtro_ndvi]
+    col1.markdown(f'<div style="text-align: center"><b>Blocos abaixo do limiar</b> ({etapa_selecionada})</div>', unsafe_allow_html=True)
+    col1.write(dados_ndvi_filtrado[['bloco', 'ndvi']])
+
+    # inserindo a terceira linha
+    fig_taxa_ocupacao, ax_taxa_ocupacao = plt.subplots(1, 1, figsize=(10, 10))
+    dados_shape_mesclados.plot(ax=ax_taxa_ocupacao,
+                               column='tx_ocupacao',
+                               cmap='RdYlGn',
+                               legend=True,
+                               legend_kwds={'label': 'Valores de Tx de Ocupação', 'orientation': 'vertical'},
+                               linewidth=1,
+                               edgecolor='lightgray',
+                               vmin=0,
+                               vmax=1,
+                               )
+    col1.markdown(f'<div style="text-align: center"><b>Taxa de ocupação por bloco</b> ({etapa_selecionada})</div>', unsafe_allow_html=True)
+    col1.pyplot(fig_taxa_ocupacao, use_container_width=True)
+
+
     # dividir_linha(col1,col2,col3)
     dividir_coluna()
 
