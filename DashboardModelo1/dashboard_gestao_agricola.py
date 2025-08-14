@@ -219,7 +219,7 @@ if __name__ == '__main__':
     #fig_gli.update_xaxes(type="category",)
 
     # ajustando exibição do mapa com dados de GLI
-    custom_colors = ['red', 'orange', 'yellow', 'blue', 'green']
+    custom_colors = ['red', 'orange', 'yellow', 'blue', 'green', 'cyan', 'magenta', 'lightred']
     custom_cmap = ListedColormap(custom_colors)
     fig_gli_shp, ax_gli = plt.subplots(1, 1, figsize=(10, 10))
     dados_shape_mesclados.plot(ax=ax_gli,
@@ -349,6 +349,8 @@ if __name__ == '__main__':
 
     tipos_status_term = dados_gestao_agro_termal['status_term'].value_counts()
     tipos_status_term = tipos_status_term.reset_index()
+
+
     # colocando cores nas estatisticas
     #tipos_status_term['cores_status_term'] = tipos_status_term['status_term'].apply(lambda x: 'green' if x == 'baixa'  else 'yellow' if x == 'media' else 'red')
 
@@ -379,8 +381,10 @@ if __name__ == '__main__':
     fig_status_termal = px.bar(tipos_status_term,
                                x='status_term',
                                y='count',
-                               color='status_term',
-                               color_discrete_sequence=custom_colors_termal)
+                               #color='status_term',
+                               #color_discrete_sequence=custom_colors_termal
+                               )
+
     dados_shape_mesclados.plot(ax=ax_status_term,
                                column='status_term',
                                cmap=custom_cmap_termal,
@@ -395,6 +399,25 @@ if __name__ == '__main__':
     col4.pyplot(fig_status_term_shp)
     col4.plotly_chart(fig_status_termal, use_container_width=True)
     col4.write(tipos_status_term)
+
+
+    elementos_baixo_A = dados_gestao_agro['Elementos_baixo_sA'].unique().tolist()
+
+    fig_status_elementosA_shp, ax_status_elementosA = plt.subplots(1, 1, figsize=(10, 10))
+
+    item = col4.selectbox("Elementos horizonte B", ['Ca_sB', 'Mn_sB', 'B_sB', 'Fe_sB'])
+
+    dados_shape_mesclados.plot(ax=ax_status_elementosA,
+                               column=item, #'Mn_sB',
+                               cmap='YlOrRd',
+                               legend=True,
+                               #legend_kwds={'label': 'Valores de status termal', 'orientation': 'vertical'},
+                               linewidth=2,
+                               edgecolor='black',)
+
+    col4.markdown(f'<div style="text-align: center"><b>Indicativo de demanda por fertilização</b> ({etapa_selecionada})</div>',
+                  unsafe_allow_html=True)
+    col4.pyplot(fig_status_elementosA_shp)
 
     #camada_adicionada = obter_maps()
 
