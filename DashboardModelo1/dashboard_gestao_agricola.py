@@ -145,7 +145,7 @@ if __name__ == '__main__':
     dados_shape_mesclados = shape_file.merge(dados_voo, on='FID', how='inner')
 
     # proporção entre as colunas do dashboard
-    col1, col2, col3, col4 = st.columns([1, 1, 1, 1],  gap="medium",vertical_alignment="top")
+    col1, col2, col3, col4 = st.columns([1.15, 1.15, 1.15, 1],  gap="medium",vertical_alignment="top")
 
     indice_filtro_ndvi={'Etapa 1': 0.1,
                         'Etapa 2': 0.6,
@@ -157,12 +157,17 @@ if __name__ == '__main__':
     alturaPadrao = 530
 
     # ==================================================================================================================
-    # TRATANDO DADOS DE NDVI (coluna 1)
     # ==================================================================================================================
+    #  SETOR DE MAPAS SHP
+    # ==================================================================================================================
+    # ==================================================================================================================
+
+    # ========================
+    # TRATANDO DADOS DE NDVI (coluna 1)
+    # ========================
 
     # Criando gráfico do map de grid da primeira linha
     fig_ndvi_shp, ax_ndvi_shp = plt.subplots(1, 1, figsize=(10, 10))
-
     dados_shape_mesclados.plot(ax=ax_ndvi_shp,
                                column='ndvi',
                                cmap='RdYlGn',
@@ -177,46 +182,15 @@ if __name__ == '__main__':
     
     #ax_ndvi_shp.set_title(label=f"NDVI na {etapa_selecionada} ")
 
-
-
     # setor de exibição de gráficos da primeira coluna (NDVI)
     col1.markdown(f'<div style="text-align: center"><b>NVDI por bloco</b> ({etapa_selecionada})</div>', unsafe_allow_html=True)
     col1.pyplot(fig_ndvi_shp, use_container_width=True)
 
-    valor_filtro_ndvi = col1.slider("Filtro de valores NDVI ", min_value=0.0, max_value=1.0, step=0.01, value=0.0)
-    # filtrando (destacando) os dados abaixo do limiar
-    dados_gestao_agro['ndvi_cores'] = dados_gestao_agro['ndvi'].map(
-        lambda x: 'red' if x < valor_filtro_ndvi else 'green')
-    # gráficos de barras de NDVI
-    fig_ndvi = px.bar(dados_gestao_agro, y='ndvi', x="bloco", height=alturaPadrao,
-                      color='ndvi_cores', color_discrete_map="identity",
-                      labels={'bloco': 'Bloco', 'ndvi': 'Valor médio de NVDI por bloco'},
-                      # title=f"Valores médios de NDVI por bloco no voo ({etapa_selecionada})",
-                      #range_y=[0, 1],
-                      )
-    # plotando gráfico de barras com dados filtrados
 
-    col1.plotly_chart(fig_ndvi, use_container_width=True)
-    # criando um conjunto dos valores abaixo do limiar definido
-    dados_ndvi_filtrado = dados_gestao_agro[dados_gestao_agro['ndvi'] <= valor_filtro_ndvi]
-    col1.markdown(f'<div style="text-align: center"><b>Blocos abaixo do limiar</b> ({etapa_selecionada})</div>', unsafe_allow_html=True)
-    col1.write(dados_ndvi_filtrado[['bloco', 'ndvi']])
+    # ========================
+    # TRATANDO DADOS DE GLI ( coluna 2)
+    # ========================
 
-    col1.markdown(f'<div style="text-align: center"><b>Uniformidade de cultura por sítio específico</b> ({etapa_selecionada})</div>',
-                  unsafe_allow_html=True)
-
-
-    # ==================================================================================================================
-    # TRATANDO DADOS DE GLI
-    # ==================================================================================================================
-
-    #df_ndvi_filtro =
-
-    # gráficos de GLI
-
-
-
-    #fig_gli.update_xaxes(type="category",)
 
     # ajustando exibição do mapa com dados de GLI
     custom_colors = ['red', 'orange', 'yellow', 'blue', 'green', 'cyan', 'magenta', 'lightred']
@@ -235,6 +209,107 @@ if __name__ == '__main__':
     col2.markdown(f'<div style="text-align: center"><b>GLI por bloco</b> ({etapa_selecionada})</div>',
                   unsafe_allow_html=True)
     col2.pyplot(fig_gli_shp,use_container_width=True)
+
+    # ========================
+    # TRATANDO DADOS DE SAVI (coluna 3)
+    # ========================
+
+    # gráficos de SAVI
+    fig_savi_shp, ax_savi = plt.subplots(1, 1, figsize=(10, 10))
+    dados_shape_mesclados.plot(ax=ax_savi,
+                               column='savi',
+                               cmap='RdYlGn',
+                               legend=True,
+                               legend_kwds={'label': 'Valores de SAVI', 'orientation': 'vertical'},
+                               linewidth=0.9,
+                               edgecolor='gray',
+                               vmin=0,
+                               vmax=1,
+                               )
+    # ax_savi.set_title(label=f"SAVI na {etapa_selecionada} ")
+
+    col3.markdown(f'<div style="text-align: center"><b>SAVI por bloco</b> ({etapa_selecionada})</div>',
+                  unsafe_allow_html=True)
+    col3.pyplot(fig_savi_shp, use_container_width=True)
+
+
+    # ========================
+    # TRATANDO DADOS DE STATUS TERM (coluna 4)
+    # ========================
+
+    dados_gestao_agro_termal = dados_gestao_agro
+    # transformando categoria para valor
+    dados_gestao_agro_termal.loc[dados_gestao_agro_termal['status_term'] == 'baixa', 'status_term_valor'] = 10
+    dados_gestao_agro_termal.loc[dados_gestao_agro_termal['status_term'] == 'media', 'status_term_valor'] = 20
+    dados_gestao_agro_termal.loc[dados_gestao_agro_termal['status_term'] == 'alta', 'status_term_valor'] = 30
+
+    # st.write(dados_gestao_agro_termal)
+
+    tipos_status_term = dados_gestao_agro_termal['status_term'].value_counts()
+    tipos_status_term = tipos_status_term.reset_index()
+
+    # colocando cores nas estatisticas
+    # tipos_status_term['cores_status_term'] = tipos_status_term['status_term'].apply(lambda x: 'green' if x == 'baixa'  else 'yellow' if x == 'media' else 'red')
+
+    custom_colors_termal = []
+
+    if tipos_status_term['status_term'].value_counts().get('baixa', 0) > 0:
+        custom_colors_termal.append('green')
+
+    if tipos_status_term['status_term'].value_counts().get('media', 0) > 0:
+        custom_colors_termal.append('yellow')
+
+    if tipos_status_term['status_term'].value_counts().get('alta', 0) > 0:
+        custom_colors_termal.append('red')
+
+    custom_cmap_termal = ListedColormap(custom_colors_termal)
+    col4.markdown(f'<div style="text-align: center"><b>Status termal por bloco</b> ({etapa_selecionada})</div>',
+                  unsafe_allow_html=True)
+    fig_status_term_shp, ax_status_term = plt.subplots(1, 1, figsize=(8.6, 8.6))
+    dados_shape_mesclados.plot(ax=ax_status_term,
+                               column='status_term',
+                               cmap=custom_cmap_termal,
+                               legend=True,
+                               # legend_kwds={'label': 'Valores de status termal', 'orientation': 'vertical'},
+                               linewidth=1,
+                               edgecolor='gray', )
+
+    col4.pyplot(fig_status_term_shp)
+
+
+    # ==================================================================================================================
+    # ==================================================================================================================
+    # LINHA 2 -  GRÁFICOS DE BARRAS COM DISTRIBUIÇÕES DE CADA TIPO DA LINHA 1
+    # ==================================================================================================================
+    # ==================================================================================================================
+
+
+    # ========================
+    # TRATANDO DADOS DE NDVI (coluna 1)
+    # ========================
+
+    valor_filtro_ndvi = col1.slider("Filtro de valores NDVI ", min_value=0.0, max_value=1.0, step=0.01, value=0.0)
+    # filtrando (destacando) os dados abaixo do limiar
+    dados_gestao_agro['ndvi_cores'] = dados_gestao_agro['ndvi'].map(
+        lambda x: 'red' if x < valor_filtro_ndvi else 'green')
+    # gráficos de barras de NDVI
+    fig_ndvi = px.bar(dados_gestao_agro, y='ndvi', x="bloco", height=alturaPadrao,
+                      color='ndvi_cores', color_discrete_map="identity",
+                      labels={'bloco': 'Bloco', 'ndvi': 'Valor médio de NVDI por bloco'},
+                      # title=f"Valores médios de NDVI por bloco no voo ({etapa_selecionada})",
+                      #range_y=[0, 1],
+                      )
+    # plotando gráfico de barras com dados filtrados
+    col1.plotly_chart(fig_ndvi, use_container_width=True)
+    # criando um conjunto dos valores abaixo do limiar definido
+    dados_ndvi_filtrado = dados_gestao_agro[dados_gestao_agro['ndvi'] <= valor_filtro_ndvi]
+    col1.markdown(f'<div style="text-align: center"><b>Blocos abaixo do limiar</b> ({etapa_selecionada})</div>', unsafe_allow_html=True)
+    col1.write(dados_ndvi_filtrado[['bloco', 'ndvi']])
+
+    # ========================
+    # TRATANDO DADOS DE GLI (coluna 2)
+    # ========================
+
     valor_filtro_gli = col2.slider("Filtro de valores GLI ", min_value=0.0, max_value=1.0, step=0.01, value=0.0)
     # filtrando (destacando) os dados abaixo do limiar
     dados_gestao_agro['gli_cores'] = dados_gestao_agro['gli'].map(
@@ -243,14 +318,78 @@ if __name__ == '__main__':
                      labels={'bloco': 'Bloco', 'gli': 'Valor médio de GLI por bloco'},
                      text_auto=True,
                      color='gli_cores', color_discrete_map="identity",
-                     #title=f"Valores médios de GLI por bloco na \netapa ({etapa_selecionada})",
-                     #range_y=[0, 1],
+                     # title=f"Valores médios de GLI por bloco na \netapa ({etapa_selecionada})",
+                     # range_y=[0, 1],
                      )
-    col2.plotly_chart(fig_gli,use_container_width=True)
-    dados_gli_filtrado = dados_gestao_agro[ dados_gestao_agro['gli'] <= valor_filtro_gli]
+    col2.plotly_chart(fig_gli, use_container_width=True)
+
+    dados_gli_filtrado = dados_gestao_agro[dados_gestao_agro['gli'] <= valor_filtro_gli]
     col2.markdown(f'<div style="text-align: center"><b>Blocos abaixo do limiar</b> ({etapa_selecionada})</div>',
                   unsafe_allow_html=True)
     col2.write(dados_gli_filtrado[['bloco', 'gli']])
+
+    # ========================
+    # TRATANDO DADOS DE SAVI (COLUNA 3)
+    # ========================
+
+    valor_filtro_savi = col3.slider("Filtro de valores SAVI ", min_value=0.0, max_value=1.0, step=0.01, value=0.0)
+    # filtrando (destacando) os dados abaixo do limiar
+    dados_gestao_agro['savi_cores'] = dados_gestao_agro['savi'].map(
+        lambda x: 'red' if x < valor_filtro_savi else 'lightgreen')
+
+    fig_savi = px.bar(dados_gestao_agro,
+                      y='savi',
+                      x="bloco",
+                      color='savi_cores', color_discrete_map="identity",
+                      height=alturaPadrao,
+                      labels={'bloco': 'Bloco', 'savi': 'Valor médio de SAVI por bloco'},
+                      # title=f"Valores médios de SAVI por bloco no voo ({etapa_selecionada})",
+                      # range_y=[0,1],
+                      )
+    dados_savi_filtrados = dados_gestao_agro[dados_gestao_agro['savi'] <= valor_filtro_savi]
+    col3.plotly_chart(fig_savi, use_container_width=True)
+    col3.markdown(f'<div style="text-align: center"><b>Blocos abaixo do limiar</b> ({etapa_selecionada})</div>',
+                  unsafe_allow_html=True)
+    col3.write(dados_savi_filtrados[['bloco', 'savi']])
+
+    # ========================
+    # TRATANDO DADOS DE STATUS TERM (COLUNA 4)
+    # ========================
+    col4.write(tipos_status_term)
+    fig_status_termal = px.bar(
+                               tipos_status_term,
+                               x='status_term',
+                               y='count',
+                               # color='status_term',
+                               # color_discrete_sequence=custom_colors_termal
+                                labels={'status_term': 'Tipos de status termal', 'count': 'Quantidade de blocos'},
+                               )
+
+    col4.plotly_chart(fig_status_termal, figsize=(10, 10), use_container_width=True)
+
+
+    # ==================================================================================================================
+    # ==================================================================================================================
+    # LINHA 3 -  GRÁFICOS VARIADOS
+    # ==================================================================================================================
+    # ==================================================================================================================
+
+
+
+    # ==================================================================================================================
+    # TRATANDO DADOS  (coluna 1)
+    # ==================================================================================================================
+
+
+    col1.markdown(f'<div style="text-align: center"><b>Uniformidade de cultura por sítio específico</b> ({etapa_selecionada})</div>',
+                  unsafe_allow_html=True)
+
+
+    # ==================================================================================================================
+    # TRATANDO DADOS  COLUNA 2
+    # ==================================================================================================================
+
+
 
     # mapa de estimativa de safra
     fig_esti_safra_shp, ax_esti_safra_shp = plt.subplots(1, 1, figsize=(10, 10))
@@ -265,45 +404,9 @@ if __name__ == '__main__':
     #espacar_linhas(col1,col2,col3, linhas=3)
 
     # ==================================================================================================================
-    # TRATANDO DADOS DE SAVI
+    # TRATANDO DADOS DE TAXA DE OCUPAÇÃO
     # ==================================================================================================================
 
-    # gráficos de SAVI
-    fig_savi_shp, ax_savi = plt.subplots(1, 1, figsize=(10, 10))
-    dados_shape_mesclados.plot(ax=ax_savi,
-                               column='savi',
-                               cmap='RdYlGn',
-                               legend=True,
-                               legend_kwds={'label': 'Valores de SAVI', 'orientation': 'vertical'},
-                               linewidth=0.9,
-                               edgecolor='gray',
-                               vmin=0,
-                               vmax=1,
-                               )
-    #ax_savi.set_title(label=f"SAVI na {etapa_selecionada} ")
-
-
-    col3.markdown(f'<div style="text-align: center"><b>SAVI por bloco</b> ({etapa_selecionada})</div>',
-                  unsafe_allow_html=True)
-    col3.pyplot(fig_savi_shp,use_container_width=True)
-    valor_filtro_savi = col3.slider("Filtro de valores SAVI ", min_value=0.0, max_value=1.0, step=0.01, value=0.0)
-    # filtrando (destacando) os dados abaixo do limiar
-    dados_gestao_agro['savi_cores'] = dados_gestao_agro['savi'].map(
-        lambda x: 'red' if x < valor_filtro_savi else 'lightgreen')
-
-    fig_savi = px.bar(dados_gestao_agro,
-                      y='savi',
-                      x="bloco",
-                      color='savi_cores', color_discrete_map="identity",
-                      height=alturaPadrao,
-                      labels={'bloco': 'Bloco', 'savi': 'Valor médio de SAVI por bloco'},
-                      #title=f"Valores médios de SAVI por bloco no voo ({etapa_selecionada})",
-                      #range_y=[0,1],
-                      )
-    dados_savi_filtrados = dados_gestao_agro[dados_gestao_agro['savi'] <= valor_filtro_savi]
-    col3.plotly_chart(fig_savi,use_container_width=True)
-    col3.markdown(f'<div style="text-align: center"><b>Blocos abaixo do limiar</b> ({etapa_selecionada})</div>', unsafe_allow_html=True)
-    col3.write(dados_savi_filtrados[['bloco', 'savi']])
 
     # inserindo a terceira linha
     fig_taxa_ocupacao, ax_taxa_ocupacao = plt.subplots(1, 1, figsize=(10, 10))
@@ -321,85 +424,25 @@ if __name__ == '__main__':
                   unsafe_allow_html=True)
     col3.pyplot(fig_taxa_ocupacao, use_container_width=True)
 
+    fig_barras_tx_ocupacao = px.bar(dados_gestao_agro,
+                      y='tx_ocupacao',
+                      x="bloco",
+                      # color='yellow',
+                      #color_discrete_map="identity",
+                      height=alturaPadrao,
+                      labels={'bloco': 'Bloco', 'tx_ocupacao': 'Taxa de ocupação por bloco'},
+                      # title=f"Valores médios de SAVI por bloco no voo ({etapa_selecionada})",
+                      # range_y=[0,1],
+                      )
+
+    col3.plotly_chart(fig_barras_tx_ocupacao, use_container_width=True)
+
+
+
+
     # ==================================================================================================================
     # TRATANDO DADOS DE STATUS TERM
     # ==================================================================================================================
-
-
-    # graficos de Termal/Produtividade
-    #fig_status_termal = px.bar(dados_gestao_agro, y='status_term', x="bloco",
-    #                           labels={'bloco': 'Bloco', 'status_term': 'Valor  médios de taxa de ocupação por bloco'},
-    #                           title=f"Valores de status termal por bloco na etapa ({etapa_selecionada})",
-    #                           color_discrete_map={
-    #                               "baixa": "red",
-    #                               "media": "orange",
-    #                               "alta": "green",
-    #                               },)
-
-    dados_gestao_agro_termal = dados_gestao_agro
-    # transformando categoria para valor
-    dados_gestao_agro_termal.loc[dados_gestao_agro_termal['status_term'] == 'baixa', 'status_term_valor'] = 10
-    dados_gestao_agro_termal.loc[dados_gestao_agro_termal['status_term'] == 'media', 'status_term_valor'] = 20
-    dados_gestao_agro_termal.loc[dados_gestao_agro_termal['status_term'] == 'alta', 'status_term_valor'] = 30
-
-
-
-
-    #st.write(dados_gestao_agro_termal)
-
-    tipos_status_term = dados_gestao_agro_termal['status_term'].value_counts()
-    tipos_status_term = tipos_status_term.reset_index()
-
-
-    # colocando cores nas estatisticas
-    #tipos_status_term['cores_status_term'] = tipos_status_term['status_term'].apply(lambda x: 'green' if x == 'baixa'  else 'yellow' if x == 'media' else 'red')
-
-    custom_colors_termal = []
-
-    if tipos_status_term['status_term'].value_counts().get('baixa', 0) > 0:
-        custom_colors_termal.append('green')
-
-    if tipos_status_term['status_term'].value_counts().get('media', 0) > 0:
-        custom_colors_termal.append('yellow')
-
-    if tipos_status_term['status_term'].value_counts().get('alta', 0) > 0:
-        custom_colors_termal.append('red')
-
-    custom_cmap_termal = ListedColormap(custom_colors_termal)
-
-
-
-    #fig_status_termal = px.pie(dados_gestao_agro_termal, values='status_term_valor',
-    #                           names='status_term',
-    #                           title=f"Valores de status termal por bloco na etapa ({etapa_selecionada})",
-    #                           )
-
-
-    #
-
-    fig_status_term_shp, ax_status_term = plt.subplots(1, 1, figsize=(10, 10))
-    fig_status_termal = px.bar(tipos_status_term,
-                               x='status_term',
-                               y='count',
-                               #color='status_term',
-                               #color_discrete_sequence=custom_colors_termal
-                               )
-
-    dados_shape_mesclados.plot(ax=ax_status_term,
-                               column='status_term',
-                               cmap=custom_cmap_termal,
-                               legend=True,
-                               #legend_kwds={'label': 'Valores de status termal', 'orientation': 'vertical'},
-                               linewidth=2,
-                               edgecolor='black',)
-
-    #ax_status_term.set_title(label=f"Status termal na {etapa_selecionada} ")
-    col4.markdown(f'<div style="text-align: center"><b>Status termal por bloco</b> ({etapa_selecionada})</div>',
-                  unsafe_allow_html=True)
-    col4.pyplot(fig_status_term_shp)
-    col4.plotly_chart(fig_status_termal, use_container_width=True)
-    col4.write(tipos_status_term)
-
 
     elementos_baixo_A = dados_gestao_agro['Elementos_baixo_sA'].unique().tolist()
 
