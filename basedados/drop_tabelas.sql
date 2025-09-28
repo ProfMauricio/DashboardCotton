@@ -1,0 +1,13 @@
+drop table dashboard.custos_producao_talhao;
+drop table dashboard.despesas_fazenda;
+drop table dashboard.indices_calculados_talhao ;
+drop table dashboard.medida_elementos_horizonte;
+drop table dashboard.manejo_agricola_talhao;
+drop table dashboard.detalhes_despesa_guarda_chuva ;
+drop table dashboard.detalhes_custos_producao ;
+drop table dashboard.tipos_custos_producao ;
+drop table dashboard.tipos_despesas_guarda_chuva ;
+drop table dashboard.blocos;
+drop table dashboard.talhoes;
+drop table dashboard.fases_cultura ;
+drop table dashboard.fazendas ;

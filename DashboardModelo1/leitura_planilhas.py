@@ -1,8 +1,12 @@
 import os.path
-from xml.etree.ElementTree import QName
+
 
 import pandas as pd
-from logging import Logger
+import psycopg2
+from dotenv import load_dotenv
+
+from DashboardModelo1 import dados_fazenda
+
 
 #from DashboardModelo1.dados_fazenda import arquivo
 
@@ -23,7 +27,7 @@ def valor_float( temp : str) -> float :
         temp1 = temp1.split('R$')
         return float(temp1[-1])
     except Exception as e:
-        return temp
+        return 0.0
 
 # =====================================================================================================================
 # =====================================================================================================================
@@ -300,16 +304,86 @@ def carregar_dados_custo(pasta_destino:str="./dados_fazenda") -> (dict, dict) :
     return info_fazenda, dados_custo_geral, dados_custo_por_hectare, lista_talhoes_geral
 
 
-# =====================================================================================================================
-# =====================================================================================================================
-"""
-if __name__ == '__main__':
-    local_custo_geral, local_custo_hectare, talhoes_custo_geral = carregar_dados_custo(pasta_destino='./dadosPlanilha')
 
+
+# =====================================================================================================================
+# =====================================================================================================================
+
+def ativar_conexao():
+    try:
+        load_dotenv()
+        nome_base = os.getenv('DB_NAME')
+        user = os.getenv('DB_USER')
+        password = os.getenv('DB_PASSWORD')
+        port = os.getenv('DB_PORT')
+        host = os.getenv('DB_HOST')
+        conn = psycopg2.connect(
+            dbname=nome_base,
+            user=user,
+            password=password,
+            host=host,
+            port=port
+        )
+        return conn
+    except Exception as e:
+        print(e)
+        return None
+
+# ======================================================================================================================
+# ======================================================================================================================
+
+def obter_id_custo(descricao, conexao) -> int :
+    cursor = conexao.cursor()
+    consulta = f"select id from dashboard.tipos_despesas_guarda_chuva where descricao like '%{descricao}%'"
+    cursor.execute(consulta)
+    id = cursor.fetchone()
+    cursor.close()
+    return id[0]
+
+
+# ======================================================================================================================
+# ======================================================================================================================
+
+def obter_detalhe_custo(descricao, id_tipo_custo, conexao):
+    cursor = conexao.cursor()
+    consulta = f"select id from dashboard.detalhes_despesa_guarda_chuva where tipo_despesas_id = {id_tipo_custo} and nome like '%{descricao}%'"
+    cursor.execute(consulta)
+    id = cursor.fetchone()
+    cursor.close()
+    return id[0]
+
+
+# ======================================================================================================================
+# ======================================================================================================================
+
+def gravar_custos_guarda_chuva(local_custo_geral, conexao):
+    for item_custo in local_custo_geral:
+        id_tipo_custo= obter_id_custo(item_custo['item'], conexao)
+        for subitem in item_custo['subitens']:
+            temp = subitem['Nome'].split()
+            nro = len(temp[0])
+            nome = subitem['Nome'][nro+1:]
+            id_detalhe_item_custo = obter_detalhe_custo(nome, id_tipo_custo, conexao)
+            ## estruturando a inserção
+            cursor = conexao.cursor()
+            consulta = f"insert into dashboard.despesas_guarda_chuva_fazenda(fazenda_id, despesa_especificacao_id, valor, data_criacao ) values (1,{id_detalhe_item_custo},{subitem['Valor']}, now() )"
+            cursor.execute(consulta)
+            conexao.commit()
+
+# ======================================================================================================================
+# ======================================================================================================================
+
+
+
+if __name__ == '__main__':
+    local_custo_geral, local_custo_hectare, talhoes_custo_geral, lista_talhoes = carregar_dados_custo(pasta_destino='./dadosPlanilha')
     print(local_custo_geral)
+    conexao = ativar_conexao()
+    gravar_custos_guarda_chuva(local_custo_hectare, conexao)
+
     print(local_custo_hectare)
     print(talhoes_custo_geral)
-"""
+
 
 
 
