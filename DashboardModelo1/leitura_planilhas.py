@@ -333,30 +333,36 @@ def ativar_conexao():
 # ======================================================================================================================
 
 def obter_id_custo(descricao, conexao) -> int :
-    cursor = conexao.cursor()
-    consulta = f"select id from dashboard.tipos_despesas_guarda_chuva where descricao like '%{descricao}%'"
-    cursor.execute(consulta)
-    id = cursor.fetchone()
-    cursor.close()
-    return id[0]
+    try:
+        cursor = conexao.cursor()
+        consulta = f"select id from dashboard.tipos_despesas_guarda_chuva where descricao like '%{descricao}%'"
+        cursor.execute(consulta)
+        id = cursor.fetchone()
+        cursor.close()
+        return id[0]
+    except Exception as e:
+        return 0
 
 
 # ======================================================================================================================
 # ======================================================================================================================
 
 def obter_detalhe_custo(descricao, id_tipo_custo, conexao):
-    cursor = conexao.cursor()
-    consulta = f"select id from dashboard.detalhes_despesa_guarda_chuva where tipo_despesas_id = {id_tipo_custo} and nome like '%{descricao}%'"
-    cursor.execute(consulta)
-    id = cursor.fetchone()
-    cursor.close()
-    return id[0]
+    try:
+        cursor = conexao.cursor()
+        consulta = f"select id from dashboard.detalhes_tipos_despesa_guarda_chuva where tipo_despesas_id = {id_tipo_custo} and nome like '%{descricao}%'"
+        cursor.execute(consulta)
+        id = cursor.fetchone()
+        cursor.close()
+        return id[0]
+    except Exception as e:
+        return 0
 
 
 # ======================================================================================================================
 # ======================================================================================================================
 
-def gravar_custos_guarda_chuva(local_custo_geral, conexao):
+def gravar_dados_gestao_custos_guarda_chuva(local_custo_geral, conexao):
     for item_custo in local_custo_geral:
         id_tipo_custo= obter_id_custo(item_custo['item'], conexao)
         for subitem in item_custo['subitens']:
@@ -366,7 +372,7 @@ def gravar_custos_guarda_chuva(local_custo_geral, conexao):
             id_detalhe_item_custo = obter_detalhe_custo(nome, id_tipo_custo, conexao)
             ## estruturando a inserção
             cursor = conexao.cursor()
-            consulta = f"insert into dashboard.despesas_guarda_chuva_fazenda(fazenda_id, despesa_especificacao_id, valor, data_criacao ) values (1,{id_detalhe_item_custo},{subitem['Valor']}, now() )"
+            consulta = f"insert into dashboard.gestao_custos_despesas_guarda_chuva_fazenda(fazenda_id, detalhes_tipo_custo_id, valor, data_criacao, safra ) values (1,{id_detalhe_item_custo},{subitem['Valor']}, now(), '2025' )"
             cursor.execute(consulta)
             conexao.commit()
 
@@ -374,12 +380,58 @@ def gravar_custos_guarda_chuva(local_custo_geral, conexao):
 # ======================================================================================================================
 
 
+def obter_id_custo_producao(descricao, conexao):
+    try:
+        cursor = conexao.cursor()
+        consulta = f"select id from dashboard.tipos_custos_producao where descricao like '%{descricao}%'"
+        cursor.execute(consulta)
+        id = cursor.fetchone()
+        cursor.close()
+        return id[0]
+    except Exception as e:
+        return 0
+
+# ======================================================================================================================
+# ======================================================================================================================
+
+def obter_detalhe_custo_producao(descricao, id_tipo_custo, conexao):
+    try:
+        cursor = conexao.cursor()
+        consulta = f"select id from dashboard.detalhes_tipos_custos_producao where tipo_custo_id = {id_tipo_custo} and nome like '%{descricao}%'"
+        cursor.execute(consulta)
+        id = cursor.fetchone()
+        cursor.close()
+        return id[0]
+    except Exception as e:
+        return 0
+
+
+
+# ======================================================================================================================
+# ======================================================================================================================
+
+def gravar_dados_gestao_custos_producao_talha(talhoes_custo_geral, conexao):
+    for item_custo in talhoes_custo_geral:
+        id_tipo_custo_producao = obter_id_custo_producao(item_custo['item'], conexao)
+        for subitem in item_custo['subitens']:
+            temp = subitem['Nome'].split()
+            nro = len(temp[0])
+            nome = subitem['Nome'][nro+1:]
+            id_detalhe_item_custo = obter_detalhe_custo_producao(nome, id_tipo_custo_producao, conexao)
+            # inserindo os dados na base
+
+
+
+# ======================================================================================================================
+# ======================================================================================================================
+
 
 if __name__ == '__main__':
     local_custo_geral, local_custo_hectare, talhoes_custo_geral, lista_talhoes = carregar_dados_custo(pasta_destino='./dadosPlanilha')
     print(local_custo_geral)
     conexao = ativar_conexao()
-    gravar_custos_guarda_chuva(local_custo_hectare, conexao)
+    gravar_dados_gestao_custos_guarda_chuva(local_custo_hectare, conexao)
+    gravar_dados_gestao_custos_producao_talha(talhoes_custo_geral, conexao)
 
     print(local_custo_hectare)
     print(talhoes_custo_geral)

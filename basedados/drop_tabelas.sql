@@ -1,10 +1,10 @@
-drop table dashboard.custos_producao_talhao;
-drop table dashboard.despesas_fazenda;
-drop table dashboard.indices_calculados_talhao ;
-drop table dashboard.medida_elementos_horizonte;
-drop table dashboard.manejo_agricola_talhao;
-drop table dashboard.detalhes_despesa_guarda_chuva ;
-drop table dashboard.detalhes_custos_producao ;
+drop table dashboard.gestao_custos_producao_por_talhao;
+drop table dashboard.gestao_custos_despesas_guarda_chuva_fazenda;
+drop table dashboard.gestao_agricola_indices_calculados_talhao ;
+drop table dashboard.gestao_agricola_medidas_elementos_horizonte;
+drop table dashboard.gestao_agricola_talhao;
+drop table dashboard.detalhes_tipos_despesa_guarda_chuva ;
+drop table dashboard.detalhes_tipos_custos_producao ;
 drop table dashboard.tipos_custos_producao ;
 drop table dashboard.tipos_despesas_guarda_chuva ;
 drop table dashboard.blocos;

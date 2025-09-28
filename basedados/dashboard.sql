@@ -3,6 +3,13 @@
 CREATE SCHEMA IF NOT EXISTS dashboard;
 
 
+-- criar uma tabela de fases da cultura
+CREATE TABLE IF NOT EXISTS dashboard.fases_cultura (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL UNIQUE,
+    descricao TEXT,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 -- criar a tabela de fazendas
 CREATE TABLE IF NOT EXISTS dashboard.fazendas (
@@ -23,72 +30,6 @@ CREATE TABLE IF NOT EXISTS dashboard.talhoes (
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- criar a tabela de tipos de despesas
-CREATE TABLE IF NOT EXISTS dashboard.tipos_despesas_guarda_chuva (
-    id SERIAL PRIMARY KEY,
-    nome VARCHAR(255) NOT NULL UNIQUE,
-    descricao TEXT,
-    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- criar a tabela especializada de despesas
-CREATE TABLE IF NOT EXISTS dashboard.detalhes_despesa_guarda_chuva (
-    id SERIAL PRIMARY KEY,
-    tipo_despesas_id INT REFERENCES dashboard.tipos_despesas_guarda_chuva(id) ON DELETE SET NULL,
-    nome VARCHAR(255) NOT NULL UNIQUE,
-    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- criar uma tabela de fases da cultura
-CREATE TABLE IF NOT EXISTS dashboard.fases_cultura (
-    id SERIAL PRIMARY KEY,
-    nome VARCHAR(255) NOT NULL UNIQUE,
-    descricao TEXT,
-    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- criar a tabela de tipos de custos de produção
-CREATE TABLE IF NOT EXISTS dashboard.tipos_custos_producao (
-    id SERIAL PRIMARY KEY,
-    nome VARCHAR(255) NOT NULL UNIQUE,
-    descricao TEXT,
-    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- criar a tabela de especificações de custos de produção
-CREATE TABLE IF NOT EXISTS dashboard.detalhes_custos_producao (
-    id SERIAL PRIMARY KEY,
-    tipo_custo_id INT REFERENCES dashboard.tipos_custos_producao(id) ON DELETE SET NULL,
-    nome VARCHAR(255) NOT NULL UNIQUE,
-    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- criar a tabela de despesas da fazenda (guarda chuva)
-CREATE TABLE IF NOT EXISTS dashboard.despesas_guarda_chuva_fazenda (
-    id SERIAL PRIMARY KEY,
-    fazenda_id INT REFERENCES dashboard.fazendas(id) ON DELETE CASCADE,
-    despesa_especificacao_id INT REFERENCES dashboard.detalhes_despesa_guarda_chuva(id) ON DELETE SET NULL,
-    valor DECIMAL(10, 2) NOT NULL,
-    data_despesa DATE,
-    fase_cultura_id INT REFERENCES dashboard.fases_cultura(id) ON DELETE SET NULL,
-    descricao TEXT,
-    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-
--- criar a tabela de custo de producao por etapa e talhão (custo por etapa)
-CREATE TABLE IF NOT EXISTS dashboard.custos_producao_talhao (
-    id SERIAL PRIMARY KEY,
-    talhao_id INT REFERENCES dashboard.talhoes(id) ON DELETE CASCADE,
-    custo_especificacao_id INT REFERENCES dashboard.detalhes_custos_producao(id) ON DELETE SET NULL,
-    valor DECIMAL(10, 2) NOT NULL,
-    data_custo DATE,
-    fase_cultura_id INT REFERENCES dashboard.fases_cultura(id) ON DELETE SET NULL,
-    descricao TEXT,
-    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-
 -- tabela de posição geográfica dos blocos
 CREATE TABLE IF NOT EXISTS dashboard.blocos (
     id SERIAL PRIMARY KEY,
@@ -100,20 +41,80 @@ CREATE TABLE IF NOT EXISTS dashboard.blocos (
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+
+-- criar a tabela de tipos de despesas
+CREATE TABLE IF NOT EXISTS dashboard.tipos_despesas_guarda_chuva (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL UNIQUE,
+    descricao TEXT,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- criar a tabela especializada de despesas
+CREATE TABLE IF NOT EXISTS dashboard.detalhes_tipos_despesa_guarda_chuva (
+    id SERIAL PRIMARY KEY,
+    tipo_despesas_id INT REFERENCES dashboard.tipos_despesas_guarda_chuva(id) ON DELETE SET NULL,
+    nome VARCHAR(255) NOT NULL UNIQUE,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+-- criar a tabela de tipos de custos de produção
+CREATE TABLE IF NOT EXISTS dashboard.tipos_custos_producao (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL UNIQUE,
+    descricao TEXT,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- criar a tabela de especificações de custos de produção
+CREATE TABLE IF NOT EXISTS dashboard.detalhes_tipos_custos_producao (
+    id SERIAL PRIMARY KEY,
+    tipo_custo_id INT REFERENCES dashboard.tipos_custos_producao(id) ON DELETE SET NULL,
+    nome VARCHAR(255) NOT NULL UNIQUE,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- criar a tabela de despesas da fazenda (guarda chuva)
+CREATE TABLE IF NOT EXISTS dashboard.gestao_custos_despesas_guarda_chuva_fazenda (
+    id SERIAL PRIMARY KEY,
+    fazenda_id INT REFERENCES dashboard.fazendas(id) ON DELETE CASCADE,
+    detalhes_tipo_custo_id INT REFERENCES dashboard.detalhes_tipos_custos_producao(id) ON DELETE SET NULL,
+    valor DECIMAL(10, 2) NOT NULL,
+    safra varchar(10) NOT NULL,
+    descricao TEXT,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+-- criar a tabela de custo de producao por etapa e talhão (custo por etapa)
+CREATE TABLE IF NOT EXISTS dashboard.gestao_custos_producao_por_talhao (
+    id SERIAL PRIMARY KEY,
+    talhao_id INT REFERENCES dashboard.talhoes(id) ON DELETE CASCADE,
+    custo_especificacao_id INT REFERENCES dashboard.detalhes_tipos_custos_producao(id) ON DELETE SET NULL,
+    valor DECIMAL(10, 2) NOT NULL,
+    safra varchar(10) NOT NULL,
+    fase_cultura_id INT REFERENCES dashboard.fases_cultura(id) ON DELETE SET NULL,
+    descricao TEXT,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
 -- tabela de manejo agrícola por talhão
-CREATE TABLE IF NOT EXISTS dashboard.manejo_agricola_talhao (
+CREATE TABLE IF NOT EXISTS dashboard.gestao_agricola_talhao (
     id SERIAL PRIMARY KEY,
     talhao_id INT REFERENCES dashboard.talhoes(id) ON DELETE CASCADE,
     bloco_id INT REFERENCES dashboard.blocos(id) ON DELETE SET NULL,
     fase_cultura_id INT REFERENCES dashboard.fases_cultura(id) ON DELETE SET NULL,
+    safra varchar(10) NOT NULL,
     ano INT not null,
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- tabela de elementos por manejo agrícola por bloco
-CREATE TABLE IF NOT EXISTS dashboard.medida_elementos_horizonte (
+CREATE TABLE IF NOT EXISTS dashboard.gestao_agricola_medidas_elementos_horizonte (
     id SERIAL PRIMARY KEY,
-    manejo_agricola_id INT REFERENCES dashboard.manejo_agricola_talhao(id) ON DELETE CASCADE,
+    manejo_agricola_id INT REFERENCES dashboard.gestao_agricola_talhao(id) ON DELETE CASCADE,
     horizonte VARCHAR(50) NOT NULL,
     ph_h2o DECIMAL(4, 6) NOT NULL,
     ph_cacl2 DECIMAL(4, 6) NOT NULL,
@@ -133,9 +134,9 @@ CREATE TABLE IF NOT EXISTS dashboard.medida_elementos_horizonte (
 );
 
 -- tabela de indices calculados por manejo agrícola por bloco
-CREATE TABLE IF NOT EXISTS dashboard.indices_calculados_talhao (
+CREATE TABLE IF NOT EXISTS dashboard.gestao_agricola_indices_calculados_talhao (
     id SERIAL PRIMARY KEY,
-    manejo_agricola_id INT REFERENCES dashboard.manejo_agricola_talhao(id) ON DELETE CASCADE,
+    manejo_agricola_id INT REFERENCES dashboard.gestao_agricola_talhao(id) ON DELETE CASCADE,
     ndvi DECIMAL(5, 6) NOT NULL,
     savi DECIMAL(5, 6) NOT NULL,
     gli DECIMAL(5, 6) NOT NULL,

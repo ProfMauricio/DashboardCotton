@@ -13,7 +13,7 @@ insert into dashboard.tipos_despesas_guarda_chuva (nome, descricao, data_criacao
 
 
 -- incluindo as especialiddes dos tipos de despesas guarda-chuva
-insert into dashboard.detalhes_despesa_guarda_chuva(tipo_despesas_id, nome, data_criacao) values (1,'Permanente', now()),
+insert into dashboard.detalhes_tipos_despesa_guarda_chuva(tipo_despesas_id, nome, data_criacao) values (1,'Permanente', now()),
                                                                                                     (1, 'Temporária', now()),
                                                                                                     (2,'Manutenção Máquinas Equipamentos Utilit.', now()),
                                                                                                     (2, 'Manutenção Benfeitorias',now() ),
@@ -45,7 +45,7 @@ insert into dashboard.tipos_custos_producao(nome, descricao, data_criacao) value
 
 
 -- incluindo dados de detalhes
-insert into dashboard.detalhes_custos_producao(tipo_custo_id, nome, data_criacao) values (1,'Sementes de Algodão', now()),
+insert into dashboard.detalhes_tipos_custos_producao(tipo_custo_id, nome, data_criacao) values (1,'Sementes de Algodão', now()),
                                                                                       (1,'Royalteis sementes algodão', now()),
                                                                                       (1,'Sementes de cobertura (pré-plantio de algodão)', now()),
                                                                                       (2,'Corretivos de solo - Calcário / Fósforo / Potássio / Gesso Agrícola', now()),
