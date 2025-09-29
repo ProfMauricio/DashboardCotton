@@ -410,15 +410,40 @@ def obter_detalhe_custo_producao(descricao, id_tipo_custo, conexao):
 # ======================================================================================================================
 # ======================================================================================================================
 
-def gravar_dados_gestao_custos_producao_talha(talhoes_custo_geral, conexao):
-    for item_custo in talhoes_custo_geral:
-        id_tipo_custo_producao = obter_id_custo_producao(item_custo['item'], conexao)
-        for subitem in item_custo['subitens']:
-            temp = subitem['Nome'].split()
-            nro = len(temp[0])
-            nome = subitem['Nome'][nro+1:]
-            id_detalhe_item_custo = obter_detalhe_custo_producao(nome, id_tipo_custo_producao, conexao)
-            # inserindo os dados na base
+def obter_id_etapa(etapa, conexao):
+    try:
+        cursor = conexao.cursor()
+        consulta = f"select id from dashboard.fases_cultura where nome like '%{etapa}%'"
+        cursor.execute(consulta)
+        id = cursor.fetchone()
+        cursor.close()
+        return id[0]
+    except Exception as e:
+        return 0
+
+
+def gravar_dados_gestao_custos_producao_talha(talhoes_custo_geral, etapa, conexao):
+
+    # buscando o id da etapa utilizada
+    id_etapa = obter_id_etapa(etapa, conexao)
+    cursor = conexao.cursor()
+
+    for ind_talhao, item_custo in enumerate(talhoes_custo_geral):
+        for subitem in item_custo['itens']:
+            id_tipo_custo_producao = obter_id_custo_producao(subitem['NomeItem'], conexao)
+            for valor_por_etapa in subitem['subitens']:
+                temp = valor_por_etapa['Nome'].split('-')
+                nro = len(temp[0])
+                nome = valor_por_etapa['Nome'][nro + 2:]
+                nome = nome.lstrip()
+                nome = nome.rstrip()
+                id_custo_especificacao = obter_detalhe_custo_producao(nome, id_tipo_custo_producao,
+                                                                      conexao)
+                consulta = (f"insert into dashboard.gestao_custos_producao_por_talhao(talhao_id, custo_especificacao_id, valor, safra, fase_cultura_id, descricao, data_criacao) values "
+                        f"({ind_talhao+1},{id_custo_especificacao},{valor_por_etapa[etapa]},{2025},{id_etapa},'{nome}', now())")
+                cursor.execute(consulta)
+                conexao.commit()
+    cursor.close()
 
 
 
@@ -430,8 +455,9 @@ if __name__ == '__main__':
     local_custo_geral, local_custo_hectare, talhoes_custo_geral, lista_talhoes = carregar_dados_custo(pasta_destino='./dadosPlanilha')
     print(local_custo_geral)
     conexao = ativar_conexao()
-    gravar_dados_gestao_custos_guarda_chuva(local_custo_hectare, conexao)
-    gravar_dados_gestao_custos_producao_talha(talhoes_custo_geral, conexao)
+    #gravar_dados_gestao_custos_guarda_chuva(local_custo_hectare, conexao)
+    gravar_dados_gestao_custos_producao_talha(lista_talhoes, "Etapa1", conexao)
+    gravar_dados_gestao_custos_producao_talha(lista_talhoes, "Etapa2", conexao)
 
     print(local_custo_hectare)
     print(talhoes_custo_geral)

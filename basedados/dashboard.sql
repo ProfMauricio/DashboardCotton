@@ -27,6 +27,8 @@ CREATE TABLE IF NOT EXISTS dashboard.talhoes (
     fazenda_id INT REFERENCES dashboard.fazendas(id) ON DELETE CASCADE,
     nome VARCHAR(255) NOT NULL,
     area_hectares DECIMAL(10, 2) NOT NULL,
+    latitude DECIMAL(10, 7) NOT NULL,
+    longitude DECIMAL(10, 7) NOT NULL,
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -79,7 +81,7 @@ CREATE TABLE IF NOT EXISTS dashboard.detalhes_tipos_custos_producao (
 CREATE TABLE IF NOT EXISTS dashboard.gestao_custos_despesas_guarda_chuva_fazenda (
     id SERIAL PRIMARY KEY,
     fazenda_id INT REFERENCES dashboard.fazendas(id) ON DELETE CASCADE,
-    detalhes_tipo_custo_id INT REFERENCES dashboard.detalhes_tipos_custos_producao(id) ON DELETE SET NULL,
+    detalhes_tipo_custo_id INT REFERENCES dashboard.detalhes_tipos_despesa_guarda_chuva(id) ON DELETE SET NULL,
     valor DECIMAL(10, 2) NOT NULL,
     safra varchar(10) NOT NULL,
     descricao TEXT,
@@ -105,16 +107,15 @@ CREATE TABLE IF NOT EXISTS dashboard.gestao_agricola_talhao (
     id SERIAL PRIMARY KEY,
     talhao_id INT REFERENCES dashboard.talhoes(id) ON DELETE CASCADE,
     bloco_id INT REFERENCES dashboard.blocos(id) ON DELETE SET NULL,
-    fase_cultura_id INT REFERENCES dashboard.fases_cultura(id) ON DELETE SET NULL,
     safra varchar(10) NOT NULL,
-    ano INT not null,
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- tabela de elementos por manejo agrícola por bloco
 CREATE TABLE IF NOT EXISTS dashboard.gestao_agricola_medidas_elementos_horizonte (
     id SERIAL PRIMARY KEY,
-    manejo_agricola_id INT REFERENCES dashboard.gestao_agricola_talhao(id) ON DELETE CASCADE,
+    bloco_id INT REFERENCES dashboard.gestao_agricola_talhao(id) ON DELETE CASCADE,
+    fase_cultura_id INT REFERENCES dashboard.fases_cultura(id) ON DELETE SET NULL,
     horizonte VARCHAR(50) NOT NULL,
     ph_h2o DECIMAL(4, 6) NOT NULL,
     ph_cacl2 DECIMAL(4, 6) NOT NULL,
@@ -136,7 +137,8 @@ CREATE TABLE IF NOT EXISTS dashboard.gestao_agricola_medidas_elementos_horizonte
 -- tabela de indices calculados por manejo agrícola por bloco
 CREATE TABLE IF NOT EXISTS dashboard.gestao_agricola_indices_calculados_talhao (
     id SERIAL PRIMARY KEY,
-    manejo_agricola_id INT REFERENCES dashboard.gestao_agricola_talhao(id) ON DELETE CASCADE,
+    bloco_id INT REFERENCES dashboard.gestao_agricola_talhao(id) ON DELETE CASCADE,
+    fase_cultura_id INT REFERENCES dashboard.fases_cultura(id) ON DELETE SET NULL,
     ndvi DECIMAL(5, 6) NOT NULL,
     savi DECIMAL(5, 6) NOT NULL,
     gli DECIMAL(5, 6) NOT NULL,

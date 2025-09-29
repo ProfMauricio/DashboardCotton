@@ -1,7 +1,7 @@
 -- incluindo as fases do cultivo
-insert into dashboard.fases_cultura (nome, descricao, data_criacao) values ('Fase 1', 'Fase 1 - Vegetativo', now());
-insert into dashboard.fases_cultura (nome, descricao, data_criacao) values ('Fase 2', 'Fase 2 - Início da fase reprodutiva', now());
-insert into dashboard.fases_cultura (nome, descricao, data_criacao) values ('Fase 3', 'Fase 3 - Final fase reprodutiva, maturação e colheita', now());
+insert into dashboard.fases_cultura (nome, descricao, data_criacao) values ('Etapa1', 'Etapa 1 - Vegetativo', now());
+insert into dashboard.fases_cultura (nome, descricao, data_criacao) values ('Etapa2', 'Etapa 2 - Início da fase reprodutiva', now());
+insert into dashboard.fases_cultura (nome, descricao, data_criacao) values ('Etapa2', 'Etapa 3 - Final fase reprodutiva, maturação e colheita', now());
 
 
 --  incluindo os tipos de despesas guarda-chuva
@@ -58,11 +58,11 @@ insert into dashboard.detalhes_tipos_custos_producao(tipo_custo_id, nome, data_c
                                                                                       (3, 'Colheita', now()),
                                                                                       (3,'Embalagens Colheita (filme plástico) / Utensílios',now()),
                                                                                       (3,'Serviços terceirizados - Aluguel de máquinas e outro', now()),
-                                                                                      (3,'Serviços terceirizados - Aluguel de máquinas e outro 1', now()),
-                                                                                      (3,'Serviços terceirizados - Aluguel de máquinas e outro 2', now()),
-                                                                                      (3,'Serviços terceirizados - Aluguel de máquinas e outro 3', now()),
-                                                                                      (3,'Serviços terceirizados - Aluguel de máquinas e outro 4', now()),
-                                                                                      (3,'Serviços terceirizados - Aluguel de máquinas e outro 5', now()),
+                                                                                      (3,'Serviços terceirizado - Aluguel de máquinas e outro 1', now()),
+                                                                                      (3,'Serviços terceirizado - Aluguel de máquinas e outro 2', now()),
+                                                                                      (3,'Serviços terceirizado - Aluguel de máquinas e outro 3', now()),
+                                                                                      (3,'Serviços terceirizado - Aluguel de máquinas e outro 4', now()),
+                                                                                      (3,'Serviços terceirizado - Aluguel de máquinas e outro 5', now()),
                                                                                       (3,'Irrigação (A)', now()),
                                                                                       (3,'Coleta de imagens multiespectrais com drones (VANTs)', now()),
                                                                                       (4, 'Fungicida', now()),
@@ -81,8 +81,9 @@ insert into dashboard.detalhes_tipos_custos_producao(tipo_custo_id, nome, data_c
 insert into dashboard.fazendas(nome, area_hectares, qtde_talhoes, data_criacao) values ('São José', 350, 4, now() );
 
 -- inserindo talhoes
-insert into dashboard.talhoes(fazenda_id, nome, area_hectares, data_criacao) values (1,'Talho 1', 50, now());
-insert into dashboard.talhoes(fazenda_id, nome, area_hectares, data_criacao) values (1,'Talho 2', 50, now());
-insert into dashboard.talhoes(fazenda_id, nome, area_hectares, data_criacao) values (1,'Talho 3', 50, now());
+insert into dashboard.talhoes(fazenda_id, nome, area_hectares, latitude, longitude, data_criacao) values (1,'Talho 1', 50,1.353535,3.3533535,now());
+insert into dashboard.talhoes(fazenda_id, nome, area_hectares, latitude, longitude, data_criacao) values (1,'Talho 2', 30,2.353535,5.656565, now());
+insert into dashboard.talhoes(fazenda_id, nome, area_hectares, latitude, longitude, data_criacao) values (1,'Talho 3', 10,2.353535,5.656565, now());
+insert into dashboard.talhoes(fazenda_id, nome, area_hectares, latitude, longitude, data_criacao) values (1,'Talho 4', 25,2.353535,5.656565, now());
 
 
