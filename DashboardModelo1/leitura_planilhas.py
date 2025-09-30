@@ -1,20 +1,21 @@
 import os.path
 
-
 import pandas as pd
 import psycopg2
 from dotenv import load_dotenv
 
+from dados_fazenda import DadosFazenda
+
 from DashboardModelo1 import dados_fazenda
 
 
-#from DashboardModelo1.dados_fazenda import arquivo
+# from DashboardModelo1.dados_fazenda import arquivo
 
 
 # =====================================================================================================================
 # =====================================================================================================================
 
-def valor_float( temp : str) -> float :
+def valor_float(temp: str) -> float:
     """
     Converte o dado que vem da planilha
     :param temp:
@@ -29,11 +30,12 @@ def valor_float( temp : str) -> float :
     except Exception as e:
         return 0.0
 
+
 # =====================================================================================================================
 # =====================================================================================================================
 
 # leitura de dados
-def ler_dados_fazenda( nome_arquivo_xls : str)  :
+def ler_dados_fazenda(nome_arquivo_xls: str):
     """
         Metodo para obter dados de custo de producão
         :param nome_arquivo_xls: nome do arquivo utilizado para extração dos dados
@@ -46,17 +48,18 @@ def ler_dados_fazenda( nome_arquivo_xls : str)  :
     df_fazenda.columns = ['Nome', 'Valor']
     df_fazenda = df_fazenda.dropna(thresh=1)
     # limpando os dados dos valores
-    df_fazenda['Valor'] = df_fazenda['Valor'].map(lambda x: valor_float(x)   )
-    df_talhoes= pd.read_excel(xls_file, sheet_name='Planilha2')
-    #print(df_fazenda)
-    #print("#"*30)
-    #print(df_talhoes)
+    df_fazenda['Valor'] = df_fazenda['Valor'].map(lambda x: valor_float(x))
+    df_talhoes = pd.read_excel(xls_file, sheet_name='Planilha2')
+    # print(df_fazenda)
+    # print("#"*30)
+    # print(df_talhoes)
     return df_fazenda, df_talhoes
 
+
 # =====================================================================================================================
 # =====================================================================================================================
 
-def linhas_planilha_para_lista_custo_guarda_chuva(lista_itens, dataframe_dados, lista_index) -> list :
+def linhas_planilha_para_lista_custo_guarda_chuva(lista_itens, dataframe_dados, lista_index) -> list:
     """
     Função que extrai das linhas da planilha, os itens e subitens e os organiza em uma lista com dicionários de
     dados com formato {item, subitens {nome e valor}  e total }
@@ -66,9 +69,9 @@ def linhas_planilha_para_lista_custo_guarda_chuva(lista_itens, dataframe_dados, 
     dados = []
     item_indice_atual = 0
     for itens in lista_itens:
-        while( item_indice_atual < len(lista_index)):
+        while (item_indice_atual < len(lista_index)):
             linha = dataframe_dados.iloc[item_indice_atual]
-        #for index, linha in dataframe_dados.iterrows():
+            # for index, linha in dataframe_dados.iterrows():
             if itens[0] in linha['Nome']:
                 total = 0.0
                 temp_dict = {}
@@ -96,10 +99,10 @@ def linhas_planilha_para_lista_custo_guarda_chuva(lista_itens, dataframe_dados, 
 # =====================================================================================================================
 
 def linhas_planilha_talhoes_para_lista_custo_talhao_geral(lista_itens: list,
-                                                          dataframe_dados:pd.DataFrame,
+                                                          dataframe_dados: pd.DataFrame,
                                                           lista_talhoes: list,
                                                           lista_indices: list,
-                                                          lista_nomes_talhoes: list) -> list :
+                                                          lista_nomes_talhoes: list) -> list:
     """
     Função que extrai das linhas da planilha, os itens e subitens e os organiza em uma lista com dicionários de
     dados com formato {item, subitens {nome e valor}  e total }
@@ -108,31 +111,34 @@ def linhas_planilha_talhoes_para_lista_custo_talhao_geral(lista_itens: list,
     """
     item_indice_atual = 0
     for itens in lista_itens:
-        while( item_indice_atual < len(lista_indices)):
+        while (item_indice_atual < len(lista_indices)):
             linha = dataframe_dados.iloc[item_indice_atual]
-        #for index, linha in dataframe_dados.iterrows():
+            # for index, linha in dataframe_dados.iterrows():
             if itens[0] in linha['Nome']:
                 # achou o item - separando o nome
                 total = 0.0
                 temp_dict = {}
                 nome_item = itens[0].split("-")[1]
                 for t in range(len(lista_nomes_talhoes)):
-                    dict_tmp = {'NomeItem': nome_item.lstrip(), 'totalEtapa1' : 0.0, 'totalEtapa2': 0.0, 'totalEtapa3': 0.0, }
+                    dict_tmp = {'NomeItem': nome_item.lstrip(), 'totalEtapa1': 0.0, 'totalEtapa2': 0.0,
+                                'totalEtapa3': 0.0, }
                     lista_talhoes[t]['itens'].append(dict_tmp)
                 # obtendo os subitens individuais do item
                 item_indice_atual += 1
                 for i in range(itens[1]):
                     valor_etapa1 = dataframe_dados.iloc[item_indice_atual]['ETAPA 1 - VEGETATIVO']
                     valor_etapa2 = dataframe_dados.iloc[item_indice_atual]['ETAPA 2 - INICIO DA \nFASE REPRODUTIVA']
-                    valor_etapa3 = dataframe_dados.iloc[item_indice_atual]['ETAPA 3 - FINAL FASE \nREPRODUTIVA E \nMATURAÇÃO E COLHEITA']
+                    valor_etapa3 = dataframe_dados.iloc[item_indice_atual][
+                        'ETAPA 3 - FINAL FASE \nREPRODUTIVA E \nMATURAÇÃO E COLHEITA']
 
                     for t in range(len(lista_nomes_talhoes)):
-                        subitem = {'Nome': dataframe_dados.iloc[item_indice_atual]['Nome'], 'Etapa1': float(valor_etapa1.values[t]),
-                                   'Etapa2': float(valor_etapa2.values[t]), 'Etapa3':  float(valor_etapa3.values[t])
-                                 }
+                        subitem = {'Nome': dataframe_dados.iloc[item_indice_atual]['Nome'],
+                                   'Etapa1': float(valor_etapa1.values[t]),
+                                   'Etapa2': float(valor_etapa2.values[t]), 'Etapa3': float(valor_etapa3.values[t])
+                                   }
 
                         if 'subitens' not in lista_talhoes[t]['itens'][-1]:
-                            lista_talhoes[t]['itens'][-1]['subitens'] = [ ]
+                            lista_talhoes[t]['itens'][-1]['subitens'] = []
                         lista_talhoes[t]['itens'][-1]['subitens'].append(subitem)
                     item_indice_atual += 1
                 break
@@ -151,7 +157,7 @@ def linhas_planilha_talhoes_para_lista_custo_talhao_geral(lista_itens: list,
 # =====================================================================================================================
 # =====================================================================================================================
 
-def carregar_dados_custo(pasta_destino:str="./dados_fazenda") -> (dict, dict) :
+def carregar_dados_custo(pasta_destino: str = "./dados_fazenda") -> (dict, dict):
     """
 
     :param pasta_destino: Pasta onde os dados armazenados no servidor
@@ -162,9 +168,9 @@ def carregar_dados_custo(pasta_destino:str="./dados_fazenda") -> (dict, dict) :
     arquivo_custo_padrao = 'planilha_saida.xlsx'
     nome_arquivo_dados = os.path.join(pasta_destino, arquivo_custo_padrao)
     dados_fazenda, dados_talhoes = ler_dados_fazenda(nome_arquivo_dados)
-    info_fazenda = {'NomeFazenda': "Teste",  #dados_fazenda.iloc[2, 1],
-                    'TotalHectares': "300.43", #dados_fazenda.iloc[3, 1],
-                    'QuantidadeTalhoes': 10, #dados_fazenda.iloc[4, 1],
+    info_fazenda = {'NomeFazenda': "Teste",  # dados_fazenda.iloc[2, 1],
+                    'TotalHectares': "300.43",  # dados_fazenda.iloc[3, 1],
+                    'QuantidadeTalhoes': 10,  # dados_fazenda.iloc[4, 1],
                     }
 
     # organizando os dados de interesse para o dashboard
@@ -199,7 +205,8 @@ def carregar_dados_custo(pasta_destino:str="./dados_fazenda") -> (dict, dict) :
                          ("F. OUTROS CUSTOS", 5)
                          ]
 
-    dados_custo_geral = linhas_planilha_para_lista_custo_guarda_chuva(itens_custo_geral, temp_dados_custo_geral, lista_linhas_custo_geral)
+    dados_custo_geral = linhas_planilha_para_lista_custo_guarda_chuva(itens_custo_geral, temp_dados_custo_geral,
+                                                                      lista_linhas_custo_geral)
 
     # preparando dados de custos por hectare a partir dos dados da fazenda
     for i in lista_linhas_custo_geral:
@@ -210,24 +217,25 @@ def carregar_dados_custo(pasta_destino:str="./dados_fazenda") -> (dict, dict) :
     for index, linha in temp_dados_custo_por_hectare.iterrows():
         lista_linhas_custo_geral.append(index)
 
-    dados_custo_por_hectare = linhas_planilha_para_lista_custo_guarda_chuva(itens_custo_geral, temp_dados_custo_por_hectare,
+    dados_custo_por_hectare = linhas_planilha_para_lista_custo_guarda_chuva(itens_custo_geral,
+                                                                            temp_dados_custo_por_hectare,
                                                                             lista_linhas_custo_geral)
 
-    #print(dados_custo_geral)
-    #print(dados_custo_por_hectare)
+    # print(dados_custo_geral)
+    # print(dados_custo_por_hectare)
 
     ###################
     # Custos por talhão
     ##################
     temp_dados_talhoes = dados_talhoes.copy()
-    #temp_dados_talhoes = pd.DataFrame(columns=temp_dados.columns)
+    # temp_dados_talhoes = pd.DataFrame(columns=temp_dados.columns)
     temp_dados_talhoes.dropna(axis=1, how='all', inplace=True)
     temp_dados_talhoes = temp_dados_talhoes.dropna(thresh=1)
 
     # lendo a primeira linha para determinar o nome das colunas
     linha_header = temp_dados_talhoes.iloc[0]
     temp_dados_talhoes.columns = linha_header
-    temp_dados_talhoes.reset_index(drop=True )
+    temp_dados_talhoes.reset_index(drop=True)
     cont = 0
     row = 0
     lista_colunas = list(temp_dados_talhoes.columns)
@@ -286,24 +294,17 @@ def carregar_dados_custo(pasta_destino:str="./dados_fazenda") -> (dict, dict) :
     indice += 1
     flag = False
     lista_itens = [('1 - SEMENTES', 3),
-                   ('2 - FERTILIZANTES',3),
-                   ('3 - OPERAÇÕES COM MÁQUINAS',14),
-                   ('4 - AGROTÓXICOS',9)]
+                   ('2 - FERTILIZANTES', 3),
+                   ('3 - OPERAÇÕES COM MÁQUINAS', 14),
+                   ('4 - AGROTÓXICOS', 9)]
 
     lista_talhoes_geral = linhas_planilha_talhoes_para_lista_custo_talhao_geral(dataframe_dados=dados_talhoes_geral,
                                                                                 lista_itens=lista_itens,
                                                                                 lista_talhoes=lista_talhoes_geral,
                                                                                 lista_indices=lista_indices_linhas_talhao_geral,
-                                                                                lista_nomes_talhoes = cjto_nomes_talhoes_geral)
-
-
-
-
-
+                                                                                lista_nomes_talhoes=cjto_nomes_talhoes_geral)
 
     return info_fazenda, dados_custo_geral, dados_custo_por_hectare, lista_talhoes_geral
-
-
 
 
 # =====================================================================================================================
@@ -329,10 +330,11 @@ def ativar_conexao():
         print(e)
         return None
 
+
 # ======================================================================================================================
 # ======================================================================================================================
 
-def obter_id_custo(descricao, conexao) -> int :
+def obter_id_custo(descricao, conexao) -> int:
     try:
         cursor = conexao.cursor()
         consulta = f"select id from dashboard.tipos_despesas_guarda_chuva where descricao like '%{descricao}%'"
@@ -364,17 +366,18 @@ def obter_detalhe_custo(descricao, id_tipo_custo, conexao):
 
 def gravar_dados_gestao_custos_guarda_chuva(local_custo_geral, conexao):
     for item_custo in local_custo_geral:
-        id_tipo_custo= obter_id_custo(item_custo['item'], conexao)
+        id_tipo_custo = obter_id_custo(item_custo['item'], conexao)
         for subitem in item_custo['subitens']:
             temp = subitem['Nome'].split()
             nro = len(temp[0])
-            nome = subitem['Nome'][nro+1:]
+            nome = subitem['Nome'][nro + 1:]
             id_detalhe_item_custo = obter_detalhe_custo(nome, id_tipo_custo, conexao)
             ## estruturando a inserção
             cursor = conexao.cursor()
             consulta = f"insert into dashboard.gestao_custos_despesas_guarda_chuva_fazenda(fazenda_id, detalhes_tipo_custo_id, valor, data_criacao, safra ) values (1,{id_detalhe_item_custo},{subitem['Valor']}, now(), '2025' )"
             cursor.execute(consulta)
             conexao.commit()
+
 
 # ======================================================================================================================
 # ======================================================================================================================
@@ -391,6 +394,7 @@ def obter_id_custo_producao(descricao, conexao):
     except Exception as e:
         return 0
 
+
 # ======================================================================================================================
 # ======================================================================================================================
 
@@ -404,7 +408,6 @@ def obter_detalhe_custo_producao(descricao, id_tipo_custo, conexao):
         return id[0]
     except Exception as e:
         return 0
-
 
 
 # ======================================================================================================================
@@ -423,7 +426,6 @@ def obter_id_etapa(etapa, conexao):
 
 
 def gravar_dados_gestao_custos_producao_talha(talhoes_custo_geral, etapa, conexao):
-
     # buscando o id da etapa utilizada
     id_etapa = obter_id_etapa(etapa, conexao)
     cursor = conexao.cursor()
@@ -439,12 +441,28 @@ def gravar_dados_gestao_custos_producao_talha(talhoes_custo_geral, etapa, conexa
                 nome = nome.rstrip()
                 id_custo_especificacao = obter_detalhe_custo_producao(nome, id_tipo_custo_producao,
                                                                       conexao)
-                consulta = (f"insert into dashboard.gestao_custos_producao_por_talhao(talhao_id, custo_especificacao_id, valor, safra, fase_cultura_id, descricao, data_criacao) values "
-                        f"({ind_talhao+1},{id_custo_especificacao},{valor_por_etapa[etapa]},{2025},{id_etapa},'{nome}', now())")
+                consulta = (
+                    f"insert into dashboard.gestao_custos_producao_por_talhao(talhao_id, custo_especificacao_id, valor, safra, fase_cultura_id, descricao, data_criacao) values "
+                    f"({ind_talhao + 1},{id_custo_especificacao},{valor_por_etapa[etapa]},{2025},{id_etapa},'{nome}', now())")
                 cursor.execute(consulta)
                 conexao.commit()
     cursor.close()
 
+
+def obter_dados_voos(dados: dict) -> list:
+    """
+    rotina que lê uma planilha
+    :param dados: estrutura com as fases, nomes dos arquivos e dados
+    :return:
+    """
+    global dados_agricolas_voos
+    for i, nome_arq in enumerate(dados['nomes_arquivos']):
+        if dados['status'][i] == True:
+            dados_voo = pd.read_csv(nome_arq)
+            id_voo = f'Etapa {i + 1}'
+            temp_dict = {id_voo: dados_voo}
+            dados_agricolas_voos.append(dados_voo)
+    return dados_agricolas_voos
 
 
 # ======================================================================================================================
@@ -452,18 +470,42 @@ def gravar_dados_gestao_custos_producao_talha(talhoes_custo_geral, etapa, conexa
 
 
 if __name__ == '__main__':
-    local_custo_geral, local_custo_hectare, talhoes_custo_geral, lista_talhoes = carregar_dados_custo(pasta_destino='./dadosPlanilha')
+    local_custo_geral, local_custo_hectare, talhoes_custo_geral, lista_talhoes = carregar_dados_custo(
+        pasta_destino='./dadosPlanilha')
     print(local_custo_geral)
     conexao = ativar_conexao()
-    #gravar_dados_gestao_custos_guarda_chuva(local_custo_hectare, conexao)
-    gravar_dados_gestao_custos_producao_talha(lista_talhoes, "Etapa1", conexao)
-    gravar_dados_gestao_custos_producao_talha(lista_talhoes, "Etapa2", conexao)
-
+    # gravar_dados_gestao_custos_guarda_chuva(local_custo_hectare, conexao)
+    # gravar_dados_gestao_custos_producao_talha(lista_talhoes, "Etapa1", conexao)
+    # gravar_dados_gestao_custos_producao_talha(lista_talhoes, "Etapa2", conexao)
+    # gravar_dados_gestao_custos_producao_talha(lista_talhoes, "Etapa3", conexao)
     print(local_custo_hectare)
     print(talhoes_custo_geral)
 
+    dados_agricolas_voos = []
+    dados_fazenda = {
+        'etapas': ['Etapa 1', 'Etapa 2', 'Etapa 3'],
+        'etapas_voos': ['etapa1', 'etapa2', 'etapa3'],
+        'nomes_arquivos': ['./dadosPlanilha/voos/relatorio_manejo_agricola_etapa1.csv',
+                           './dadosPlanilha/voos/relatorio_manejo_agricola_etapa2.csv',
+                           './dadosPlanilha/voos/relatorio_manejo_agricola_etapa3.csv'],
+        'status': [False, False, False],
+    }
 
+    # carregando os arquivos na memoria
 
+    leitura_dados = DadosFazenda()
+    flag_leitura_dados_remoto = True
+    # buscando os arquivos
+    for i, etapa in enumerate(dados_fazenda['etapas_voos']):
+        resposta = leitura_dados.obter_voo(etapa, dados_fazenda['nomes_arquivos'][i])
+        if i < 2:
+            resposta = True
+        dados_fazenda['status'][i] = resposta
+        if resposta:
+            print('Voo obtido com sucesso')
 
+    dados_agricolas_voos = obter_dados_voos(dados_fazenda)
+    print(dados_agricolas_voos)
 
+    for dados_etapa in dados_agricolas_voos:
 

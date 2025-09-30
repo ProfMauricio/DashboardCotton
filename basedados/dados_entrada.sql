@@ -1,7 +1,7 @@
 -- incluindo as fases do cultivo
 insert into dashboard.fases_cultura (nome, descricao, data_criacao) values ('Etapa1', 'Etapa 1 - Vegetativo', now());
 insert into dashboard.fases_cultura (nome, descricao, data_criacao) values ('Etapa2', 'Etapa 2 - Início da fase reprodutiva', now());
-insert into dashboard.fases_cultura (nome, descricao, data_criacao) values ('Etapa2', 'Etapa 3 - Final fase reprodutiva, maturação e colheita', now());
+insert into dashboard.fases_cultura (nome, descricao, data_criacao) values ('Etapa3', 'Etapa 3 - Final fase reprodutiva, maturação e colheita', now());
 
 
 --  incluindo os tipos de despesas guarda-chuva
@@ -57,12 +57,12 @@ insert into dashboard.detalhes_tipos_custos_producao(tipo_custo_id, nome, data_c
                                                                                       (3, 'Aplicações de agrotóxicos e cobertura com avião agrícola', now()),
                                                                                       (3, 'Colheita', now()),
                                                                                       (3,'Embalagens Colheita (filme plástico) / Utensílios',now()),
-                                                                                      (3,'Serviços terceirizados - Aluguel de máquinas e outro', now()),
-                                                                                      (3,'Serviços terceirizado - Aluguel de máquinas e outro 1', now()),
-                                                                                      (3,'Serviços terceirizado - Aluguel de máquinas e outro 2', now()),
-                                                                                      (3,'Serviços terceirizado - Aluguel de máquinas e outro 3', now()),
-                                                                                      (3,'Serviços terceirizado - Aluguel de máquinas e outro 4', now()),
-                                                                                      (3,'Serviços terceirizado - Aluguel de máquinas e outro 5', now()),
+                                                                                      (3,'Serviço terceirizado - Aluguel de máquinas e outro', now()),
+                                                                                      (3,'Serviço terceirizado - Aluguel de máquinas e outro 1', now()),
+                                                                                      (3,'Serviço terceirizado - Aluguel de máquinas e outro 2', now()),
+                                                                                      (3,'Serviço terceirizado - Aluguel de máquinas e outro 3', now()),
+                                                                                      (3,'Serviço terceirizado - Aluguel de máquinas e outro 4', now()),
+                                                                                      (3,'Serviço terceirizado - Aluguel de máquinas e outro 5', now()),
                                                                                       (3,'Irrigação (A)', now()),
                                                                                       (3,'Coleta de imagens multiespectrais com drones (VANTs)', now()),
                                                                                       (4, 'Fungicida', now()),
