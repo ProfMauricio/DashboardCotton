@@ -507,5 +507,5 @@ if __name__ == '__main__':
     dados_agricolas_voos = obter_dados_voos(dados_fazenda)
     print(dados_agricolas_voos)
 
-    for dados_etapa in dados_agricolas_voos:
+    # for dados_etapa in dados_agricolas_voos:
 
