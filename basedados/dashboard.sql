@@ -27,19 +27,19 @@ CREATE TABLE IF NOT EXISTS dashboard.talhoes (
     fazenda_id INT REFERENCES dashboard.fazendas(id) ON DELETE CASCADE,
     nome VARCHAR(255) NOT NULL,
     area_hectares DECIMAL(10, 2) NOT NULL,
-    latitude DECIMAL(10, 7) NOT NULL,
-    longitude DECIMAL(10, 7) NOT NULL,
+    latitude DOUBLE PRECISION NOT NULL,
+    longitude DOUBLE PRECISION NOT NULL,
+    safra varchar(10) NOT NULL,
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- tabela de posição geográfica dos blocos
 CREATE TABLE IF NOT EXISTS dashboard.blocos (
     id SERIAL PRIMARY KEY,
-    fazenda_id INT REFERENCES dashboard.fazendas(id) ON DELETE CASCADE,
     talhao_id INT REFERENCES dashboard.talhoes(id) ON DELETE CASCADE,
     bloco INT,
-    latitude DECIMAL(10, 7) NOT NULL,
-    longitude DECIMAL(10, 7) NOT NULL,
+    latitude DOUBLE PRECISION NOT NULL,
+    longitude DOUBLE PRECISION NOT NULL,
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -106,7 +106,7 @@ CREATE TABLE IF NOT EXISTS dashboard.gestao_custos_producao_por_talhao (
 CREATE TABLE IF NOT EXISTS dashboard.gestao_agricola_talhao (
     id SERIAL PRIMARY KEY,
     talhao_id INT REFERENCES dashboard.talhoes(id) ON DELETE CASCADE,
-    bloco_id INT REFERENCES dashboard.blocos(id) ON DELETE SET NULL,
+    fase_cultura_id INT REFERENCES dashboard.fases_cultura(id) ON DELETE SET NULL,
     safra varchar(10) NOT NULL,
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -114,22 +114,23 @@ CREATE TABLE IF NOT EXISTS dashboard.gestao_agricola_talhao (
 -- tabela de elementos por manejo agrícola por bloco
 CREATE TABLE IF NOT EXISTS dashboard.gestao_agricola_medidas_elementos_horizonte (
     id SERIAL PRIMARY KEY,
-    bloco_id INT REFERENCES dashboard.gestao_agricola_talhao(id) ON DELETE CASCADE,
+    bloco_id INT REFERENCES dashboard.blocos(id) ON DELETE CASCADE,
     fase_cultura_id INT REFERENCES dashboard.fases_cultura(id) ON DELETE SET NULL,
+    gestao_agricola_talhao_id INT REFERENCES dashboard.gestao_agricola_talhao(id) ON DELETE SET NULL,
     horizonte VARCHAR(50) NOT NULL,
-    ph_h2o DECIMAL(4, 6) NOT NULL,
-    ph_cacl2 DECIMAL(4, 6) NOT NULL,
-    P_resina DECIMAL(5, 6) NOT NULL,
-    K_trocavel DECIMAL(5, 6) NOT NULL,
-    MO DECIMAL(5, 6) NOT NULL,
-    Ca DECIMAL(5, 6) NOT NULL,
-    Zn DECIMAL(5, 6) NOT NULL,
-    B DECIMAL(5, 6) NOT NULL,
-    Mn DECIMAL(5, 6) NOT NULL,
-    Fe DECIMAL(5, 6) NOT NULL,
-    Na DECIMAL(5, 6) NOT NULL,
-    S DECIMAL(5, 6) NOT NULL,
-    Mg DECIMAL(5, 6) NOT NULL,
+    ph_h2o double precision NOT NULL,
+    ph_cacl2 double precision NOT NULL,
+    P_resina double precision NOT NULL,
+    K_trocavel double precision NOT NULL,
+    MO double precision NOT NULL,
+    Ca double precision NOT NULL,
+    Zn double precision NOT NULL,
+    B double precision NOT NULL,
+    Mn double precision NOT NULL,
+    Fe double precision NOT NULL,
+    Na double precision NOT NULL,
+    S double precision NOT NULL,
+    Mg double precision NOT NULL,
     Elementos_baixo TEXT,
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -137,12 +138,13 @@ CREATE TABLE IF NOT EXISTS dashboard.gestao_agricola_medidas_elementos_horizonte
 -- tabela de indices calculados por manejo agrícola por bloco
 CREATE TABLE IF NOT EXISTS dashboard.gestao_agricola_indices_calculados_talhao (
     id SERIAL PRIMARY KEY,
-    bloco_id INT REFERENCES dashboard.gestao_agricola_talhao(id) ON DELETE CASCADE,
+    bloco_id INT REFERENCES dashboard.blocos(id) ON DELETE CASCADE,
     fase_cultura_id INT REFERENCES dashboard.fases_cultura(id) ON DELETE SET NULL,
-    ndvi DECIMAL(5, 6) NOT NULL,
-    savi DECIMAL(5, 6) NOT NULL,
-    gli DECIMAL(5, 6) NOT NULL,
-    tx_ocupacao DECIMAL(5, 6) NOT NULL,
+    gestao_agricola_talhao_id INT REFERENCES dashboard.gestao_agricola_talhao(id) ON DELETE SET NULL,
+    ndvi double precision NOT NULL,
+    savi double precision NOT NULL,
+    gli double precision NOT NULL,
+    tx_ocupacao double precision NOT NULL,
     status_term VARCHAR(100) NOT NULL,
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

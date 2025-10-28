@@ -81,9 +81,9 @@ insert into dashboard.detalhes_tipos_custos_producao(tipo_custo_id, nome, data_c
 insert into dashboard.fazendas(nome, area_hectares, qtde_talhoes, data_criacao) values ('São José', 350, 4, now() );
 
 -- inserindo talhoes
-insert into dashboard.talhoes(fazenda_id, nome, area_hectares, latitude, longitude, data_criacao) values (1,'Talho 1', 50,1.353535,3.3533535,now());
-insert into dashboard.talhoes(fazenda_id, nome, area_hectares, latitude, longitude, data_criacao) values (1,'Talho 2', 30,2.353535,5.656565, now());
-insert into dashboard.talhoes(fazenda_id, nome, area_hectares, latitude, longitude, data_criacao) values (1,'Talho 3', 10,2.353535,5.656565, now());
-insert into dashboard.talhoes(fazenda_id, nome, area_hectares, latitude, longitude, data_criacao) values (1,'Talho 4', 25,2.353535,5.656565, now());
+insert into dashboard.talhoes(fazenda_id, nome, area_hectares, latitude, longitude, safra, data_criacao) values (1,'Talhão 1', 50,1.353535,3.3533535, '2025',now());
+insert into dashboard.talhoes(fazenda_id, nome, area_hectares, latitude, longitude, safra, data_criacao) values (1,'Talhão 2', 30,2.353535,5.656565, '2025',now());
+insert into dashboard.talhoes(fazenda_id, nome, area_hectares, latitude, longitude, safra, data_criacao) values (1,'Talhão 3', 10,2.353535,5.656565, '2025', now());
+insert into dashboard.talhoes(fazenda_id, nome, area_hectares, latitude, longitude, safra, data_criacao) values (1,'Talhão 4', 25,2.353535,5.656565, '2025',now());
 
 

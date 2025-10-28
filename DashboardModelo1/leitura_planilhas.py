@@ -1,5 +1,6 @@
 import os.path
 
+import numpy as np
 import pandas as pd
 import psycopg2
 from dotenv import load_dotenv
@@ -469,17 +470,151 @@ def obter_dados_voos(dados: dict) -> list:
 # ======================================================================================================================
 
 
+def gravar_bloco( bloco:int, coord_x:float, coord_y:float, conexao, fazenda:int=1, talhao_id:int=1,):
+    """
+
+    :param bloco:
+    :param coord_x:
+    :param coord_y:
+    :param conexao:
+    :param fazenda:
+    :param talhao_id:
+    :return:
+    """
+    cursor = conexao.cursor()
+    consulta = f"insert into dashboard.blocos(longitude, latitude, talhao_id, bloco, data_criacao) values ({coord_x},{coord_y},{talhao_id}, {bloco}, now() )"
+    cursor.execute(consulta)
+    conexao.commit()
+
+# ======================================================================================================================
+# ======================================================================================================================
+
+
+def obter_id_bloco(param, conexao):
+    cursor = conexao.cursor()
+    consulta = f"select id from dashboard.blocos where bloco = {param}"
+    cursor.execute(consulta)
+    id = cursor.fetchall()
+    cursor.close()
+    return id[0][0]
+
+
+# ======================================================================================================================
+# ======================================================================================================================
+
+
+def gravar_dados_gestao_agricola_elementos_horizonte(linha, id_gestao_agricola, id_fase,  conexao ):
+    # construindo dados para horizonte A
+
+    bloco_id = obter_id_bloco(linha['bloco'], conexao)
+    cursor = conexao.cursor()
+    consulta = (f"insert into dashboard.gestao_agricola_medidas_elementos_horizonte(bloco_id, fase_cultura_id, "
+                f"gestao_agricola_talhao_id, horizonte, ")
+    consulta += f"ph_h2o, ph_cacl2, p_resina, k_trocavel, mo, ca, zn, b, mn, fe, na, s, mg, elementos_baixo, data_criacao ) "
+    consulta += f"values ({bloco_id},{id_fase},{id_gestao_agricola_talhao}, 'A', {linha['pH_H2O_sA']},{linha['pH_CaCl2_sA']},"
+    consulta += f"{linha['P_resina_sA']}, {linha['K_trocavel_sA']}, {linha['MO_sA']},{linha['Ca_sA']},{linha['Zn_sA']},"
+    consulta += f"{linha['B_sA']},{linha['Mn_sA']},{linha['Fe_sA']},{linha['Na_sA']},{linha['S_sA']},{linha['Mg_sA']},"
+    elementos_baixo = linha['Elementos_baixo_sA'].replace("'", '"')
+    consulta += f"'{elementos_baixo}', now())"
+    cursor.execute(consulta)
+    conexao.commit()
+
+    consulta = (f"insert into dashboard.gestao_agricola_medidas_elementos_horizonte(bloco_id, fase_cultura_id, "
+                f"gestao_agricola_talhao_id, horizonte, ")
+    consulta += f"ph_h2o, ph_cacl2, p_resina, k_trocavel, mo, ca, zn, b, mn, fe, na, s, mg, elementos_baixo, data_criacao ) "
+    consulta += f"values ({bloco_id},{id_fase},{id_gestao_agricola_talhao}, 'B', {linha['pH_H2O_sB']},{linha['pH_CaCl2_sB']},"
+    consulta += f"{linha['P_resina_sB']}, {linha['K_trocavel_sB']}, {linha['MO_sB']},{linha['Ca_sB']},{linha['Zn_sB']},"
+    consulta += f"{linha['B_sB']},{linha['Mn_sB']},{linha['Fe_sB']},{linha['Na_sB']},{linha['S_sB']},{linha['Mg_sB']},"
+    elementos_baixo = linha['Elementos_baixo_sA'].replace("'", '"')
+    consulta += f"'{elementos_baixo}', now())"
+    cursor.execute(consulta)
+    conexao.commit()
+    cursor.close()
+
+# ======================================================================================================================
+# ======================================================================================================================
+
+def obter_id_talhao(talhao, conexao):
+    try:
+        cursor = conexao.cursor()
+        consulta = f"select id from dashboard.talhoes where nome like '%{talhao}%'"
+        cursor.execute(consulta)
+        id = cursor.fetchone()
+        cursor.close()
+        return id[0]
+    except Exception as e:
+        return 0
+
+# ======================================================================================================================
+# ======================================================================================================================
+
+def gravar_dados_gestao_agricola_talhao(talhao, fase_cultura, safra, conexao) -> int :
+    """
+    Função para gestão de talhão e seus respecivos blocos
+    :param talhao:
+    :param fase_cultura:
+    :param safra:
+    :param conexao:
+    :return: Retorna o id de gestão do talhao
+    """
+    id_fase = obter_id_etapa(fase_cultura, conexao)
+    id_talhao = obter_id_talhao(talhao, conexao)
+    cursor = conexao.cursor()
+    consulta = (f"insert into dashboard.gestao_agricola_talhao(talhao_id, fase_cultura_id, safra, data_criacao) values "
+                f"({id_talhao},{id_fase},{safra}, now()) returning id")
+    cursor.execute(consulta)
+    conexao.commit()
+    id_talhao = cursor.fetchone()[0]
+    return id_talhao
+
+# ======================================================================================================================
+# ======================================================================================================================
+
+def gravar_dados_gestao_agricola_indics_calculados_talhao(linha, id_fase, id_gestao_agricola_talhao,  conexao):
+    bloco_id = obter_id_bloco(linha['bloco'], conexao)
+    cursor = conexao.cursor()
+    consulta = (f"insert into dashboard.gestao_agricola_indices_calculados_talhao(bloco_id, fase_cultura_id, "
+                f"gestao_agricola_talhao_id, ndvi, savi, gli, tx_ocupacao, status_term, data_criacao) ")
+    consulta += f"values ({bloco_id},{id_fase},{id_gestao_agricola_talhao}, "
+    consulta += f"{linha['ndvi']},{linha['savi']},{linha['gli']},{linha['tx_ocupacao']},'{linha['status_term']}',now())"
+    cursor.execute(consulta)
+    conexao.commit()
+    cursor.close()
+
+
+# ======================================================================================================================
+# ======================================================================================================================
+
+
+# ======================================================================================================================
+# ======================================================================================================================
+
+
+
+
+# ======================================================================================================================
+# ======================================================================================================================
+#
+#       PRINCIPAL TEMPORÁRIO
+#
+# ======================================================================================================================
+# ======================================================================================================================
+
+
 if __name__ == '__main__':
+    conexao = ativar_conexao()
+
     local_custo_geral, local_custo_hectare, talhoes_custo_geral, lista_talhoes = carregar_dados_custo(
         pasta_destino='./dadosPlanilha')
     print(local_custo_geral)
-    conexao = ativar_conexao()
-    # gravar_dados_gestao_custos_guarda_chuva(local_custo_hectare, conexao)
-    # gravar_dados_gestao_custos_producao_talha(lista_talhoes, "Etapa1", conexao)
-    # gravar_dados_gestao_custos_producao_talha(lista_talhoes, "Etapa2", conexao)
-    # gravar_dados_gestao_custos_producao_talha(lista_talhoes, "Etapa3", conexao)
+    #conexao = ativar_conexao()
+    gravar_dados_gestao_custos_guarda_chuva(local_custo_hectare, conexao)
+    gravar_dados_gestao_custos_producao_talha(lista_talhoes, "Etapa1", conexao)
+    gravar_dados_gestao_custos_producao_talha(lista_talhoes, "Etapa2", conexao)
+    gravar_dados_gestao_custos_producao_talha(lista_talhoes, "Etapa3", conexao)
     print(local_custo_hectare)
     print(talhoes_custo_geral)
+
 
     dados_agricolas_voos = []
     dados_fazenda = {
@@ -493,6 +628,7 @@ if __name__ == '__main__':
 
     # carregando os arquivos na memoria
 
+
     leitura_dados = DadosFazenda()
     flag_leitura_dados_remoto = True
     # buscando os arquivos
@@ -505,7 +641,32 @@ if __name__ == '__main__':
             print('Voo obtido com sucesso')
 
     dados_agricolas_voos = obter_dados_voos(dados_fazenda)
-    print(dados_agricolas_voos)
+    #print(dados_agricolas_voos)
 
-    # for dados_etapa in dados_agricolas_voos:
+    # gravando os blocos apenas uma vez
+    df_blocos = dados_agricolas_voos[0]
+
+    for index, linha in df_blocos.iterrows():
+        print(linha)
+        gravar_bloco(linha['bloco'], linha['utm-x'], linha['utm-y'], conexao)
+
+
+    # criando o registro de gestão do talhao
+    fase = linha['etp_veg']
+    if 'Etapa 1' in fase:
+        fase = 'Etapa1'
+    elif 'Etapa 2' in fase:
+        fase = 'Etapa2'
+    elif 'Etapa 3' in fase:
+        fase = 'Etapa3'
+    id_fase = obter_id_etapa(fase, conexao)
+    id_gestao_agricola_talhao = gravar_dados_gestao_agricola_talhao(talhao='Talhão 1', fase_cultura=fase, safra='2025',conexao=conexao)
+    for ind, dados_etapa in enumerate(dados_agricolas_voos):
+        for index, linha in dados_etapa.iterrows():
+            linha = linha.replace(np.nan, 0, regex=True)
+            if (ind > 0 ):
+                gravar_dados_gestao_agricola_elementos_horizonte(linha, id_fase, id_gestao_agricola_talhao, conexao)
+            gravar_dados_gestao_agricola_indics_calculados_talhao(linha, id_fase, id_gestao_agricola_talhao, conexao)
+
+
 
