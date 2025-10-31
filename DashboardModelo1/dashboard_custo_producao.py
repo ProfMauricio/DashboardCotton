@@ -70,7 +70,8 @@ if __name__ == '__main__':
                                     title=f"Custos gerais de produção no {talhao_selecionado}")
     col2.plotly_chart(fig_guarda_chuva_geral_por_talhao)
 
-    st.subheader("Gráficos e estatísticas de Custos por hectare")
+    #st.subheader("Gráficos e estatísticas de Custos por hectare")
+    col2.write(valores_somados_por_tipo_custo_por_talhao)
     st.divider()
 
 
