@@ -1,13 +1,47 @@
 import streamlit as st
-#import pandas as pd
+import pandas as pd
 import plotly.express as px
-from leitura_planilhas import *
+#from leitura_planilhas import *
+from sqlalchemy import create_engine
+
+
+df_fazenda = None
+df_custo = None
+df_custo_por_talhao_guarda_chuva =None
+df_detalhes_custo_producao = None
+df_custos_producao = None
+df_talhoes = None
+
+
+# =====================================================================================================================
+# =====================================================================================================================
+
+#@st.cache_data()
+def load_data_from_db():
+    # carregando os dados de gestão agricola
+    url_conexao = 'postgresql://embrapa:Mtech_emb@187.45.184.210:1000/sgcpa'
+    db_schema = "dashboard"
+    connect_args = {'options': f'-c search_path={db_schema}'}
+    engine = create_engine(url_conexao, connect_args=connect_args)
+    sessao = engine.connect()
+    # dados de sensoriamento do solo
+    rdf_fazenda = pd.read_sql_query("select * from dashboard.fazendas where nome like 'São José'", sessao)
+    id = rdf_fazenda.iloc[0]['id']
+    rdf_custo_producao_guarda_chuva = pd.read_sql_query("select * from dashboard.v_gestao_guarda_chuva_fazenda", sessao)
+    rdf_custo_por_talhao_guarda_chuva = pd.read_sql_query("select * from dashboard.v_gestao_guarda_chuva_por_talhao", sessao)
+    rdf_detalhes_custo_producao = pd.read_sql_query("select * from dashboard.detalhes_tipos_custos_producao", sessao)
+    rdf_custos_producao = pd.read_sql_query("select * from dashboard.tipos_custos_producao", sessao)
+    rdf_talhoes = pd.read_sql_query("select * from dashboard.talhoes ", sessao)
+    sessao.close()
+    engine.dispose()
+    return rdf_fazenda, rdf_custo_producao_guarda_chuva, rdf_custo_por_talhao_guarda_chuva, rdf_detalhes_custo_producao, rdf_custos_producao, rdf_talhoes
 
 
 if __name__ == '__main__':
-    # dados originais 
+    # dados originais
+    df_fazenda, df_custo_producao_guarda_chuva, df_custo_por_talhao_guarda_chuva, df_detalhes_custo_producao, df_custos_producao, df_talhoes = load_data_from_db()
     #dados_fazenda, dados_talhoes = ler_dados_fazenda('./dadosPlanilha/planilha_saida.xlsx')
-    info_fazenda, local_custo_geral, local_custo_hectare, talhoes_custo_geral = carregar_dados_custo(pasta_destino='./dadosPlanilha')
+    #info_fazenda, local_custo_geral, local_custo_hectare, talhoes_custo_geral = carregar_dados_custo(pasta_destino='./dadosPlanilha')
 
     ################
     # Manipulação dos dashboards
@@ -15,11 +49,34 @@ if __name__ == '__main__':
     # Configurar o layout da página
     st.set_page_config(layout="wide")
     st.image('./logo_embrapa.png', width=200)
-    st.subheader(f'Custo de produção - Fazenda {info_fazenda["NomeFazenda"]}')
+    dados = df_fazenda.iloc[0]
+    st.subheader(f'Fazenda {dados["nome"]} -- Custo de produção ')
+    st.divider()
+    col1, col2  = st.columns([6,6])
+    col1.subheader("Custo geral por tipo de despesa")
+    valores_somados_por_tipo_custo = df_custo_producao_guarda_chuva.groupby('Tipo_Custo')['valor'].sum()
+    fig_guarda_chuva_geral = px.bar(valores_somados_por_tipo_custo,
+                                    labels={'Tipo_Custo': 'Despesas', 'value': 'Valores em R$'},
+                                    title="Custos gerais de produção")
+    col1.plotly_chart(fig_guarda_chuva_geral)
+    col1.write(valores_somados_por_tipo_custo, use_container_width=True)
+    ### tratando os dados de custo por hectare
+    col2.subheader("Custos gerais por tipo de despesa por talhão")
+    talhao_selecionado = col2.selectbox(f"Talhões da fazenda {dados['nome']}",  df_talhoes['nome'].unique() )
+    df_custo_talhao = df_custo_por_talhao_guarda_chuva[df_custo_por_talhao_guarda_chuva['nome_talhao'] == talhao_selecionado ]
+    valores_somados_por_tipo_custo_por_talhao = df_custo_talhao.groupby('tipo_despesa')['valor'].sum()
+    fig_guarda_chuva_geral_por_talhao = px.bar(valores_somados_por_tipo_custo_por_talhao,
+                                    labels={'Tipo_Custo': 'Despesas', 'value': 'Valores em R$'},
+                                    title=f"Custos gerais de produção no {talhao_selecionado}")
+    col2.plotly_chart(fig_guarda_chuva_geral_por_talhao)
+
+    st.subheader("Gráficos e estatísticas de Custos por hectare")
+    st.divider()
 
 
-    #col1, col2  = st.columns([7,3])
 
+
+def comentarios():
     # organizando os dados de custo geral num dataframe para exibir
     dict_custo = { 'Nomes': [ dado['item'] for dado in local_custo_geral ],
                    'Valores': [ dado['total'] for dado in local_custo_geral ],

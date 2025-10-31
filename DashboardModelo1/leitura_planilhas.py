@@ -647,7 +647,7 @@ if __name__ == '__main__':
     df_blocos = dados_agricolas_voos[0]
 
     for index, linha in df_blocos.iterrows():
-        print(linha)
+        #print(linha)
         gravar_bloco(linha['bloco'], linha['utm-x'], linha['utm-y'], conexao)
 
 
@@ -659,9 +659,23 @@ if __name__ == '__main__':
         fase = 'Etapa2'
     elif 'Etapa 3' in fase:
         fase = 'Etapa3'
-    id_fase = obter_id_etapa(fase, conexao)
-    id_gestao_agricola_talhao = gravar_dados_gestao_agricola_talhao(talhao='Talhão 1', fase_cultura=fase, safra='2025',conexao=conexao)
+    #id_fase = obter_id_etapa(fase, conexao)
+    #id_gestao_agricola_talhao = gravar_dados_gestao_agricola_talhao(talhao='Talhão 1', fase_cultura=fase, safra='2025',conexao=conexao)
+
     for ind, dados_etapa in enumerate(dados_agricolas_voos):
+        for index, linha in dados_etapa.iterrows():
+            fase = linha['etp_veg']
+            if 'Etapa 1' in fase:
+                fase = 'Etapa1'
+            elif 'Etapa 2' in fase:
+                fase = 'Etapa2'
+            elif 'Etapa 3' in fase:
+                fase = 'Etapa3'
+            break
+        id_fase = obter_id_etapa(fase, conexao)
+        id_gestao_agricola_talhao = gravar_dados_gestao_agricola_talhao(talhao='Talhão 1', fase_cultura=fase,
+                                                                        safra='2025',
+                                                                        conexao=conexao)
         for index, linha in dados_etapa.iterrows():
             linha = linha.replace(np.nan, 0, regex=True)
             if (ind > 0 ):
