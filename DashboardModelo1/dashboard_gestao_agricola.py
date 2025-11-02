@@ -27,7 +27,13 @@ shape_file = None
 @st.cache_data()
 def load_data_from_db():
     #carregando os dados de gestão agricola
-    url_conexao ='postgresql://embrapa:Mtech_emb@187.45.184.210:1000/sgcpa'
+    DB_USER = st.secrets["database"]['user']
+    DB_PASSWORD = st.secrets["database"]['password']
+    DB_HOST = st.secrets["database"]['host']
+    DB_PORT = st.secrets["database"]['port']
+    DB_DATABASE = st.secrets["database"]['database']
+
+    url_conexao = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_DATABASE}'
     db_schema = "dashboard"
     connect_args = {'options': f'-c search_path={db_schema}'}
     engine = create_engine(url_conexao, connect_args=connect_args)
